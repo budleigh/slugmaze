@@ -1,18 +1,22 @@
+import Maze from './Maze.js';
+
 class Game {
   constructor(w, h) {
     this.w = w;
     this.h = h;
     this.x = 0;
+
+    this.maze = new Maze(50, 50, 50, 50, 6);
   }
 
   update(dt) {
-    this.x += 3;
+
   }
 
   draw(ctx) {
     ctx.clearRect(0, 0, this.w, this.h);
-    ctx.fillRect(this.x, 30, 20, 20);
+    this.maze.draw(ctx);
   }
 }
 
-export default Game
+export default Game;
