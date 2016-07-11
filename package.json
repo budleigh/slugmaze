@@ -7,12 +7,13 @@
     "node": "6.2.1"
   },
   "scripts": {
-    "prebuild": "rm -rf build && mkdir build",
+    "clean": "rm -rf build && mkdir build",
+    "prebuild": "npm run clean",
     "build:html": "cp src/index.html build/index.html",
     "build:js": "browserify src/index.js -t [ babelify --presets [ es2015 ] ] > build/bundle.js",
     "build": "npm run build:html && npm run build:js",
+    "prewatch": "npm run clean",
     "watch": "npm run prebuild && watchify src/index.js -o build/bundle.js -v -t babelify",
-    "prestart": "npm run build",
     "start": "node server.js"
   },
   "keywords": [
