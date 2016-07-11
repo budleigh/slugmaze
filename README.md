@@ -8,6 +8,11 @@
   unwavering ineffable gods! They will show you the way, and your job
   is merely to reproduce their instructions. Or face certain death. Have fun!
 
+## Testimonial ##
+  A slug was shown a Path. The Path rotated beneath him. Since the slug was
+  itself a part of the Maze, it too rotated. Thus, the Path did not change. In
+  this moment, the slug found enlightenment.
+
 ## Instructions and Tutorial ##
   * Internalize the briefly shown Path in your deepest inner self, for the
   remainder of eternity. It will not reappear, despite your protests. It is the
@@ -24,4 +29,4 @@
     is unwinnable. There is no escape. There is no victory. There is only the
     sweet embrace of death.
 
-  * High scores will be saved.
+  * Use the arrow keys to move.
