@@ -15,6 +15,6 @@ const delta = {
 };
 
 export {
-  dir,
+  dirs,
   delta,
 };

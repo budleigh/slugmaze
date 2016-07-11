@@ -5,7 +5,6 @@ class Game {
   constructor(w, h) {
     this.w = w;
     this.h = h;
-    this.x = 0;
 
     this.input = new Input();
 
@@ -14,7 +13,7 @@ class Game {
 
   update(dt) {
     this.input.update();
-    this.maze.update(dt);
+    this.maze.update(dt, this.input.getPressedKeys());
   }
 
   draw(ctx) {

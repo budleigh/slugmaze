@@ -1,6 +1,7 @@
 import Entity from './Entity.js';
 import Cell from './Cell.js';
 import Player from './Player.js';
+import { delta } from './dirs.js';
 
 class Maze extends Entity {
   constructor(x, y, cellWidth, cellHeight, cellsPerSide) {
@@ -10,7 +11,7 @@ class Maze extends Entity {
     this.cellsPerSide = cellsPerSide;
     this.cells = this.createCells(cellWidth, cellHeight, cellsPerSide);
 
-    this.player = new Player(this.cells[0][0], 12, 12);
+    this.player = this.createPlayer(1, 2);
   }
 
   createCells(cellWidth, cellHeight, cellsPerSide) {
@@ -31,6 +32,10 @@ class Maze extends Entity {
     return result;
   }
 
+  createPlayer(gridX, gridY) {
+    return new Player(this.cells[gridX][gridY], gridX, gridY, 12, 12);
+  }
+
   forEachCell(callback) {
     for (let i = 0; i < this.cellsPerSide; i++) {
       for (let j = 0; j < this.cellsPerSide; j++) {
@@ -39,7 +44,21 @@ class Maze extends Entity {
     }
   }
 
-  update(dt) {
+  handleInput(keys) {
+    // just worry about one key for now
+    const key = keys[0];
+    if (!key) return;
+
+    const gridDelta = delta[key];
+    const gridX = this.player.gridX + gridDelta.x;
+    const gridY = this.player.gridY + gridDelta.y;
+
+    this.player.moveToCell(this.cells[gridX][gridY], gridX, gridY);
+  }
+
+  update(dt, keys) {
+    this.handleInput(keys);
+
     this.forEachCell(cell => cell.update(dt));
   }
 
