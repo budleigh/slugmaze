@@ -8,7 +8,7 @@ class Player extends Entity {
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.fillStyle = 'red'
+    ctx.fillStyle = 'red';
 
     ctx.fillRect(0, 0, this.w, this.h);
 

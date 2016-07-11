@@ -6,7 +6,7 @@ class Input {
       37: 'L',
       38: 'U',
       39: 'R',
-      40: 'D'
+      40: 'D',
     };
 
     this.lastFrameInput = {};
