@@ -12,6 +12,11 @@ class Maze extends Entity {
     this.cells = this.createCells(cellWidth, cellHeight, cellsPerSide);
 
     this.player = this.createPlayer(1, 2);
+
+    this.cells[2][2].openPath('L')
+    this.cells[2][2].openPath('D')
+    this.cells[2][2].openPath('U')
+    this.cells[2][2].openPath('R')
   }
 
   createCells(cellWidth, cellHeight, cellsPerSide) {

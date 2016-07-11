@@ -16439,8 +16439,9 @@ var Cell = function (_Entity) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Cell).call(this, x, y, w, h));
 
-    _this.centerSize = 6;
+    _this.centerSize = 8;
     _this.pathThickness = 4;
+    _this.pathOffsetFromCenter = 5;
 
     _this.closeAllPaths();
     return _this;
@@ -16459,40 +16460,62 @@ var Cell = function (_Entity) {
   }, {
     key: 'drawPath',
     value: function drawPath(ctx, dir) {
-      switch (dir) {
-        case _dirs.dirs.L:
-      }
+      ctx.strokeStyle = 'rgb(255, 255, 255)';
+      ctx.lineWidth = this.pathThickness;
+      ctx.beginPath();
+
+      var dx = _dirs.delta[dir].x;
+      var dy = _dirs.delta[dir].y;
+
+      ctx.moveTo(this.cx + dx * this.pathOffsetFromCenter, this.cy + dy * this.pathOffsetFromCenter);
+
+      ctx.lineTo(this.cx + dx * this.w / 2, this.cy + dy * this.h / 2);
+
+      ctx.stroke();
     }
   }, {
     key: 'drawPaths',
     value: function drawPaths(ctx) {
-      (0, _lodash.each)(this.paths, function (path) {});
+      var _this2 = this;
+
+      ctx.save();
+
+      (0, _lodash.each)(this.paths, function (hasPath, dir) {
+        if (hasPath) {
+          _this2.drawPath(ctx, dir);
+        }
+      });
+
+      ctx.restore();
     }
   }, {
     key: 'drawCenter',
     value: function drawCenter(ctx) {
       ctx.save();
-
+      ctx.translate(this.cx, this.cy);
       ctx.fillStyle = 'rgb(180,180,180)';
+
       ctx.fillRect(-this.centerSize / 2, -this.centerSize / 2, this.centerSize, this.centerSize);
+
+      ctx.restore();
+    }
+  }, {
+    key: 'drawBackground',
+    value: function drawBackground(ctx) {
+      ctx.save();
+
+      ctx.translate(this.x, this.y);
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, this.w, this.h);
 
       ctx.restore();
     }
   }, {
     key: 'draw',
     value: function draw(ctx) {
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.fillStyle = 'black';
-
-      ctx.fillRect(0, 0, this.w, this.h);
-
-      ctx.restore();
-
-      ctx.save();
-      ctx.translate(this.cx, this.cy);
+      this.drawBackground(ctx);
       this.drawCenter(ctx);
-      ctx.restore();
+      this.drawPaths(ctx);
     }
   }]);
 
@@ -16743,6 +16766,11 @@ var Maze = function (_Entity) {
     _this.cells = _this.createCells(cellWidth, cellHeight, cellsPerSide);
 
     _this.player = _this.createPlayer(1, 2);
+
+    _this.cells[2][2].openPath('L');
+    _this.cells[2][2].openPath('D');
+    _this.cells[2][2].openPath('U');
+    _this.cells[2][2].openPath('R');
     return _this;
   }
 
