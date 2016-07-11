@@ -30,3 +30,6 @@
     sweet embrace of death.
 
   * Use the arrow keys to move.
+
+## Demo ##
+  [Try it here](http://upholsterer-surprises-38306.bitballoon.com/)
