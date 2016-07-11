@@ -10,7 +10,7 @@
 
 ## Testimonial ##
   A slug was shown a Path. The Path rotated beneath him. Since the slug was
-  itself a part of the Maze, it too rotated. Thus, the Path did not change. In
+  itself a part of the Path, it too rotated. Thus, the Path did not change. In
   this moment, the slug found enlightenment.
 
 ## Instructions and Tutorial ##

@@ -1,0 +1,24 @@
+{
+  "name": "slugmaze",
+  "version": "0.0.0",
+  "description": "a slug in a maze",
+  "main": "index.js",
+  "scripts": {
+    "prebuild": "cp src/index.html build/index.html",
+    "build": "browserify src/index.js -t [ babelify --presets [ es2015 ] ] > build/bundle.js",
+    "watch": "npm run prebuild && watchify src/index.js -o build/bundle.js -v -t babelify"
+  },
+  "keywords": [
+    "slug",
+    "maze"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.10.1",
+    "babel-preset-es2015": "^6.9.0",
+    "babelify": "^7.3.0",
+    "browserify": "^13.0.1",
+    "watchify": "^3.7.0"
+  }
+}
