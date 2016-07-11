@@ -31,4 +31,4 @@
   * Use the arrow keys to move.
 
 ## Demo ##
-  [Try it here](http://upholsterer-surprises-38306.bitballoon.com/)
+  [Try it here](http://slugmaze.herokuapp.com/)
