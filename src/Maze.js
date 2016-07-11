@@ -1,5 +1,6 @@
 import Entity from './Entity.js';
 import Cell from './Cell.js';
+import Player from './Player.js';
 
 class Maze extends Entity {
   constructor(x, y, cellWidth, cellHeight, cellsPerSide) {
@@ -8,6 +9,8 @@ class Maze extends Entity {
     this.cellHeight = cellHeight;
     this.cellsPerSide = cellsPerSide;
     this.cells = this.createCells(cellWidth, cellHeight, cellsPerSide);
+
+    this.player = new Player(this.cells[0][0], 12, 12);
   }
 
   createCells(cellWidth, cellHeight, cellsPerSide) {
@@ -49,6 +52,8 @@ class Maze extends Entity {
     ctx.lineWidth = '2';
     ctx.strokeStyle = 'red';
     ctx.strokeRect(0, 0, this.w, this.h);
+
+    this.player.draw(ctx);
 
     ctx.restore();
   }

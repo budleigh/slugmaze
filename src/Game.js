@@ -6,7 +6,7 @@ class Game {
     this.h = h;
     this.x = 0;
 
-    this.maze = new Maze(50, 50, 50, 50, 6);
+    this.maze = new Maze(50, 50, 90, 90, 6);
   }
 
   update(dt) {
