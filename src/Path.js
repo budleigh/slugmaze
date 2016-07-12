@@ -1,4 +1,4 @@
-import { filter, sample } from 'lodash';
+import { filter, sample, each } from 'lodash';
 
 import { dirs, delta } from './dirs.js';
 import Grid from './Grid.js';
@@ -33,8 +33,6 @@ class Path {
           dir => grid.read(x + delta[dir].x, y + delta[dir].y)
         );
 
-        console.log({ x, y, validDirs })
-
         if (validDirs.length) {
           // choose a valid direction, add it to our path, and keep going
           nextDir = sample(validDirs);
@@ -54,8 +52,21 @@ class Path {
       tries++;
     }
   }
-}
 
-console.log(Path.random(0, 0, 6, 6, 12))
+  static each(startX, startY, path, iterator) {
+    let x = startX;
+    let y = startY;
+
+    // calls `iterator` on every cell visited but the last
+    each(path, (dir, idx) => {
+      iterator(x, y, idx);
+      x += delta[dir].x;
+      y += delta[dir].y;
+    });
+
+    // so we need to hit it manually at the end
+    iterator(x, y, path.length);
+  }
+}
 
 export default Path;

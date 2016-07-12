@@ -18,7 +18,7 @@ class Cell extends Entity {
     this.paths[dir] = true;
   }
 
-  closeAllPaths(dir) {
+  closeAllPaths() {
     this.paths = {};
   }
 
