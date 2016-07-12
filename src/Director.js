@@ -14,12 +14,12 @@ class Director extends Entity {
     this.lives = 3;
 
     this.maze = this.createMaze(w, h, cellsPerSide);
-    this.newRound();
-
     this.HUD = this.createHUD(w, h);
 
     this.maze.emitter.on(events.GOAL, () => this.newRound());
     this.maze.emitter.on(events.DIE, () => this.killPlayer());
+
+    this.newRound();
   }
 
   createMaze(w, h, cellsPerSide) {
@@ -44,6 +44,8 @@ class Director extends Entity {
   newRound() {
     this.round += 1;
 
+    this.HUD.setRound(this.round);
+
     this.clearPathAtPlayer();
 
     this.maze.setPlayerMobility(false);
@@ -57,7 +59,8 @@ class Director extends Entity {
 
   killPlayer() {
     this.lives -= 1;
-    console.log('you died haha');
+
+    this.HUD.setLives(this.lives);
   }
 
   showPaths(delay = 0, onComplete) {

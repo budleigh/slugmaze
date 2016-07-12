@@ -17911,8 +17911,6 @@ var Director = function (_Entity) {
     _this.lives = 3;
 
     _this.maze = _this.createMaze(w, h, cellsPerSide);
-    _this.newRound();
-
     _this.HUD = _this.createHUD(w, h);
 
     _this.maze.emitter.on(_Maze.events.GOAL, function () {
@@ -17921,6 +17919,8 @@ var Director = function (_Entity) {
     _this.maze.emitter.on(_Maze.events.DIE, function () {
       return _this.killPlayer();
     });
+
+    _this.newRound();
     return _this;
   }
 
@@ -17952,6 +17952,8 @@ var Director = function (_Entity) {
 
       this.round += 1;
 
+      this.HUD.setRound(this.round);
+
       this.clearPathAtPlayer();
 
       this.maze.setPlayerMobility(false);
@@ -17966,7 +17968,8 @@ var Director = function (_Entity) {
     key: 'killPlayer',
     value: function killPlayer() {
       this.lives -= 1;
-      console.log('you died haha');
+
+      this.HUD.setLives(this.lives);
     }
   }, {
     key: 'showPaths',
