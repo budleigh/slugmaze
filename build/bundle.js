@@ -17863,7 +17863,7 @@ var Cell = function (_Entity) {
 
 exports.default = Cell;
 
-},{"./Entity.js":21,"./dirs.js":28,"lodash":16}],20:[function(require,module,exports){
+},{"./Entity.js":21,"./dirs.js":29,"lodash":16}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17886,6 +17886,10 @@ var _Maze = require('./Maze.js');
 
 var _Maze2 = _interopRequireDefault(_Maze);
 
+var _HUD = require('./HUD.js');
+
+var _HUD2 = _interopRequireDefault(_HUD);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -17903,12 +17907,17 @@ var Director = function (_Entity) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Director).call(this, 0, 0, w, h));
 
     _this.cellsPerSide = cellsPerSide;
+    _this.round = 0;
+    _this.lives = 3;
 
     _this.maze = _this.createMaze(w, h, cellsPerSide);
     _this.newRound();
 
     _this.maze.emitter.on(_Maze.events.GOAL, function () {
       return _this.newRound();
+    });
+    _this.maze.emitter.on(_Maze.events.DIE, function () {
+      return _this.killPlayer();
     });
     return _this;
   }
@@ -17929,52 +17938,77 @@ var Director = function (_Entity) {
     value: function newRound() {
       var _this2 = this;
 
+      this.round += 1;
+
       this.clearPathAtPlayer();
+
       this.maze.setPlayerMobility(false);
-      this.showPaths(function () {
-        _this2.reflectMaze(function () {
+
+      this.showPaths(250, function () {
+        _this2.reflectMaze(0, function () {
           _this2.maze.setPlayerMobility(true);
         });
       });
     }
   }, {
+    key: 'killPlayer',
+    value: function killPlayer() {
+      this.lives -= 1;
+      console.log('you died haha');
+    }
+  }, {
     key: 'showPaths',
-    value: function showPaths(callback) {
+    value: function showPaths() {
       var _this3 = this;
 
-      var fadeInDuration = 600;
-      var fadeOutDuration = 600;
+      var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+      var callback = arguments[1];
+
+      var fadeInDuration = 400;
+      var fadeOutDuration = 700;
 
       // yuck
-      this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
-        _this3.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(callback);
-      });
+      setTimeout(function () {
+        _this3.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
+          _this3.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(callback);
+        });
+      }, delay);
     }
   }, {
     key: 'rotateMaze',
-    value: function rotateMaze(callback) {
+    value: function rotateMaze() {
       var _this4 = this;
+
+      var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+      var callback = arguments[1];
 
       var turns = (0, _lodash.sample)([-2, -1, 1, 2]);
       var duration = Math.abs(600 * turns);
 
-      this.maze.tweenRotation(duration, turns).onComplete(function () {
-        _this4.maze.applyInputRotation(turns);
-        callback();
-      });
+      setTimeout(function () {
+        _this4.maze.tweenRotation(duration, turns).onComplete(function () {
+          _this4.maze.applyInputRotation(turns);
+          callback();
+        });
+      }, delay);
     }
   }, {
     key: 'reflectMaze',
-    value: function reflectMaze(callback) {
+    value: function reflectMaze() {
       var _this5 = this;
+
+      var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+      var callback = arguments[1];
 
       var duration = 600;
       var xAxis = Math.random() > .5;
 
-      this.maze.tweenReflection(duration, xAxis).onComplete(function () {
-        _this5.maze.applyInputReflection(xAxis);
-        callback();
-      });
+      setTimeout(function () {
+        _this5.maze.tweenReflection(duration, xAxis).onComplete(function () {
+          _this5.maze.applyInputReflection(xAxis);
+          callback();
+        });
+      }, delay);
     }
   }, {
     key: 'clearPathAtPlayer',
@@ -18016,7 +18050,7 @@ var Director = function (_Entity) {
 
 exports.default = Director;
 
-},{"./Entity.js":21,"./Maze.js":25,"./Path.js":26,"lodash":16}],21:[function(require,module,exports){
+},{"./Entity.js":21,"./HUD.js":24,"./Maze.js":26,"./Path.js":27,"lodash":16}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18140,7 +18174,7 @@ var Game = function () {
 
 exports.default = Game;
 
-},{"./Background.js":18,"./Director.js":20,"./Input.js":24}],23:[function(require,module,exports){
+},{"./Background.js":18,"./Director.js":20,"./Input.js":25}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18211,6 +18245,49 @@ var Grid = function () {
 exports.default = Grid;
 
 },{}],24:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Entity2 = require('./Entity.js');
+
+var _Entity3 = _interopRequireDefault(_Entity2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var HUD = function (_Entity) {
+  _inherits(HUD, _Entity);
+
+  function HUD(x, y, w, h) {
+    _classCallCheck(this, HUD);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(HUD).call(this, x, y, w, h));
+  }
+
+  _createClass(HUD, [{
+    key: 'draw',
+    value: function draw(ctx) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.strokeStyle = 'blue';
+      ctx.lineWidth = 3;
+
+      ctx.strokeRect(0, 0, this.w, this.h);
+
+      ctx.restore();
+    }
+  }]);
+
+  return HUD;
+}(_Entity3.default);
+
+},{"./Entity.js":21}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18295,7 +18372,7 @@ var Input = function () {
 
 exports.default = Input;
 
-},{"lodash":16}],25:[function(require,module,exports){
+},{"lodash":16}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18582,7 +18659,7 @@ var Maze = function (_Entity) {
 exports.default = Maze;
 exports.events = events;
 
-},{"./Cell.js":19,"./Entity.js":21,"./Grid.js":23,"./Path.js":26,"./Player.js":27,"./dirs.js":28,"event-emitter":15,"lodash":16,"tween.js":17}],26:[function(require,module,exports){
+},{"./Cell.js":19,"./Entity.js":21,"./Grid.js":23,"./Path.js":27,"./Player.js":28,"./dirs.js":29,"event-emitter":15,"lodash":16,"tween.js":17}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18705,7 +18782,7 @@ var Path = function () {
 
 exports.default = Path;
 
-},{"./Grid.js":23,"./dirs.js":28,"lodash":16}],27:[function(require,module,exports){
+},{"./Grid.js":23,"./dirs.js":29,"lodash":16}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18773,7 +18850,7 @@ var Player = function (_Entity) {
 
 exports.default = Player;
 
-},{"./Entity.js":21}],28:[function(require,module,exports){
+},{"./Entity.js":21}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18834,7 +18911,7 @@ var Dir = {
 
 exports.default = Dir;
 
-},{"lodash":16}],29:[function(require,module,exports){
+},{"lodash":16}],30:[function(require,module,exports){
 'use strict';
 
 var _game = require('./game.js');
@@ -18867,4 +18944,4 @@ function gameloop(timestamp) {
 
 requestAnimationFrame(gameloop);
 
-},{"./game.js":22}]},{},[29]);
+},{"./game.js":22}]},{},[30]);

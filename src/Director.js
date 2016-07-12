@@ -3,6 +3,7 @@ import { sample } from 'lodash';
 import Entity from './Entity.js';
 import Path from './Path.js';
 import Maze, { events } from './Maze.js';
+import HUD from './HUD.js';
 
 class Director extends Entity {
   constructor(w, h, cellsPerSide) {
@@ -36,8 +37,8 @@ class Director extends Entity {
 
     this.maze.setPlayerMobility(false);
 
-    this.showPaths(() => {
-      this.reflectMaze(() => {
+    this.showPaths(250, () => {
+      this.reflectMaze(0, () => {
         this.maze.setPlayerMobility(true)
       });
     });
@@ -48,34 +49,40 @@ class Director extends Entity {
     console.log('you died haha');
   }
 
-  showPaths(callback) {
-    const fadeInDuration = 600;
-    const fadeOutDuration = 600;
+  showPaths(delay = 0, callback) {
+    const fadeInDuration = 400;
+    const fadeOutDuration = 700;
 
     // yuck
-    this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(() => {
-      this.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(callback);
-    });
+    setTimeout(() => {
+      this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(() => {
+        this.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(callback);
+      });
+    }, delay)
   }
 
-  rotateMaze(callback) {
+  rotateMaze(delay = 0, callback) {
     const turns = sample([-2, -1, 1, 2]);
     const duration = Math.abs(600 * turns);
 
-    this.maze.tweenRotation(duration, turns).onComplete(() => {
-      this.maze.applyInputRotation(turns);
-      callback();
-    });
+    setTimeout(() => {
+      this.maze.tweenRotation(duration, turns).onComplete(() => {
+        this.maze.applyInputRotation(turns);
+        callback();
+      });
+    }, delay);
   }
 
-  reflectMaze(callback) {
+  reflectMaze(delay = 0, callback) {
     const duration = 600;
     const xAxis = Math.random() > .5;
 
-    this.maze.tweenReflection(duration, xAxis).onComplete(() => {
-      this.maze.applyInputReflection(xAxis);
-      callback();
-    });
+    setTimeout(() => {
+      this.maze.tweenReflection(duration, xAxis).onComplete(() => {
+        this.maze.applyInputReflection(xAxis);
+        callback();
+      });
+    }, delay);
   }
 
   clearPathAtPlayer() {
