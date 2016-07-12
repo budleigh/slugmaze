@@ -39,4 +39,4 @@ leading the way forward. Also, you are a slug.
   At that moment, the student was enlightened.
 
 ## Demo ##
-  [Try it here](http://slugmaze.herokuapp.com/)
+  [Try it here!](http://slugmaze.herokuapp.com/)
