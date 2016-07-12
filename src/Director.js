@@ -11,20 +11,15 @@ class Director extends Entity {
   constructor(w, h, cellsPerSide) {
     super(0, 0, w, h);
 
-    this.cellsPerSide = cellsPerSide;
     this.round = 0;
     this.lives = 3;
 
     this.HUD = this.createHUD(w, h);
-
-    this.maze = this.createMaze(w, h, cellsPerSide);
-    this.maze.emitter.on(events.GOAL, () => this.onGoal());
-    this.maze.emitter.on(events.DIE, () => this.onDie());
-
-    this.newRound();
+    this.initMaze(cellsPerSide);
 
     window.setRound = this.setRound.bind(this);
     window.setLives = this.setLives.bind(this);
+    window.initMaze = this.initMaze.bind(this);
   }
 
   // debug methods to put on `window`
@@ -37,6 +32,16 @@ class Director extends Entity {
   setLives(lives) {
     this.lives = lives;
     this.HUD.setLives(lives);
+  }
+
+  initMaze(cellsPerSide) {
+    this.cellsPerSide = cellsPerSide;
+
+    this.maze = this.createMaze(this.w, this.h, cellsPerSide);
+    this.maze.emitter.on(events.GOAL, () => this.onGoal());
+    this.maze.emitter.on(events.DIE, () => this.onDie());
+
+    this.newRound();
   }
 
   createMaze(w, h, cellsPerSide) {

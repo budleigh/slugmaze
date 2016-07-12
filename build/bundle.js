@@ -17910,24 +17910,15 @@ var Director = function (_Entity) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Director).call(this, 0, 0, w, h));
 
-    _this.cellsPerSide = cellsPerSide;
     _this.round = 0;
     _this.lives = 3;
 
     _this.HUD = _this.createHUD(w, h);
-
-    _this.maze = _this.createMaze(w, h, cellsPerSide);
-    _this.maze.emitter.on(_Maze.events.GOAL, function () {
-      return _this.onGoal();
-    });
-    _this.maze.emitter.on(_Maze.events.DIE, function () {
-      return _this.onDie();
-    });
-
-    _this.newRound();
+    _this.initMaze(cellsPerSide);
 
     window.setRound = _this.setRound.bind(_this);
     window.setLives = _this.setLives.bind(_this);
+    window.initMaze = _this.initMaze.bind(_this);
     return _this;
   }
 
@@ -17946,6 +17937,23 @@ var Director = function (_Entity) {
     value: function setLives(lives) {
       this.lives = lives;
       this.HUD.setLives(lives);
+    }
+  }, {
+    key: 'initMaze',
+    value: function initMaze(cellsPerSide) {
+      var _this2 = this;
+
+      this.cellsPerSide = cellsPerSide;
+
+      this.maze = this.createMaze(this.w, this.h, cellsPerSide);
+      this.maze.emitter.on(_Maze.events.GOAL, function () {
+        return _this2.onGoal();
+      });
+      this.maze.emitter.on(_Maze.events.DIE, function () {
+        return _this2.onDie();
+      });
+
+      this.newRound();
     }
   }, {
     key: 'createMaze',
@@ -17981,7 +17989,7 @@ var Director = function (_Entity) {
   }, {
     key: 'newRound',
     value: function newRound() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.maze.setPlayerMobility(false);
       this.clearPathAtPlayer();
@@ -17996,7 +18004,7 @@ var Director = function (_Entity) {
         method: this.reflectMaze,
         args: [100]
       }], function () {
-        return _this2.maze.setPlayerMobility(true);
+        return _this3.maze.setPlayerMobility(true);
       });
     }
 
@@ -18005,13 +18013,13 @@ var Director = function (_Entity) {
   }, {
     key: 'chainTransforms',
     value: function chainTransforms(transformData, onComplete) {
-      var _this3 = this;
+      var _this4 = this;
 
       return (0, _lodash.reduceRight)(transformData, function (chain, _ref) {
         var method = _ref.method;
         var args = _ref.args;
 
-        return method.bind.apply(method, [_this3].concat(_toConsumableArray(args), [chain]));
+        return method.bind.apply(method, [_this4].concat(_toConsumableArray(args), [chain]));
       }, onComplete)();
     }
   }, {
@@ -18030,7 +18038,7 @@ var Director = function (_Entity) {
   }, {
     key: 'showPaths',
     value: function showPaths() {
-      var _this4 = this;
+      var _this5 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18039,15 +18047,15 @@ var Director = function (_Entity) {
       var fadeOutDuration = 700;
 
       setTimeout(function () {
-        _this4.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
-          _this4.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
+        _this5.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
+          _this5.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
         });
       }, delay);
     }
   }, {
     key: 'rotateMaze',
     value: function rotateMaze() {
-      var _this5 = this;
+      var _this6 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18056,8 +18064,8 @@ var Director = function (_Entity) {
       var duration = Math.abs(600 * turns);
 
       setTimeout(function () {
-        _this5.maze.tweenRotation(duration, turns).onComplete(function () {
-          _this5.maze.applyInputRotation(turns);
+        _this6.maze.tweenRotation(duration, turns).onComplete(function () {
+          _this6.maze.applyInputRotation(turns);
           onComplete();
         });
       }, delay);
@@ -18065,7 +18073,7 @@ var Director = function (_Entity) {
   }, {
     key: 'reflectMaze',
     value: function reflectMaze() {
-      var _this6 = this;
+      var _this7 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18074,8 +18082,8 @@ var Director = function (_Entity) {
       var duration = 600;
 
       setTimeout(function () {
-        _this6.maze.tweenReflection(duration, xAxis).onComplete(function () {
-          _this6.maze.applyInputReflection(xAxis);
+        _this7.maze.tweenReflection(duration, xAxis).onComplete(function () {
+          _this7.maze.applyInputReflection(xAxis);
           onComplete();
         });
       }, delay);
