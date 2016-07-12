@@ -18050,8 +18050,9 @@ var Director = function (_Entity) {
       var startX = _maze$getPlayerGridCo.x;
       var startY = _maze$getPlayerGridCo.y;
 
+      var pathLength = Math.floor(this.round / 2) + 3;
 
-      var path = _Path2.default.random(startX, startY, this.cellsPerSide, this.cellsPerSide, 6);
+      var path = _Path2.default.random(startX, startY, this.cellsPerSide, this.cellsPerSide, pathLength);
 
       var delta = _Path2.default.delta(path);
 

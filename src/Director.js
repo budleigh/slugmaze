@@ -112,13 +112,14 @@ class Director extends Entity {
     this.maze.closeAllPaths();
 
     const { x: startX, y: startY } = this.maze.getPlayerGridCoords();
+    const pathLength = Math.floor(this.round / 2) + 3;
 
     const path = Path.random(
       startX,
       startY,
       this.cellsPerSide,
       this.cellsPerSide,
-      6
+      pathLength
     );
 
     const delta = Path.delta(path);
