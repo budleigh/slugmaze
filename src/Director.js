@@ -12,7 +12,7 @@ class Director extends Entity {
     super(0, 0, w, h);
 
     this.round = 0;
-    this.lives = 3;
+    this.lives = 1;
 
     this.HUD = this.createHUD(w, h);
     this.initMaze(cellsPerSide);
@@ -60,7 +60,7 @@ class Director extends Entity {
     const hudX = (w - hudWidth) / 2;
     const hudY = h * .05;
 
-    return new HUD(hudX, hudY, hudWidth, hudHeight, 3, 0);
+    return new HUD(hudX, hudY, hudWidth, hudHeight, this.lives, this.round);
   }
 
   onGoal() {
@@ -105,6 +105,12 @@ class Director extends Entity {
     this.maze.flashBorderColor(borderColorFlashDuration, 'red');
     this.killPlayer();
     this.newRound();
+
+    if (this.lives === 0) {
+      setInterval(() => {
+        this.maze.flashBorderColor(borderColorFlashDuration, 'red');
+      }, borderColorFlashDuration * 1.2);
+    }
   }
 
   killPlayer() {
