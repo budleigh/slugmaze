@@ -12,6 +12,7 @@ class Director {
 
   newRound() {
     this.clearPathAtPlayer();
+    this.maze.tweenCellAlpha(1000, 0);
   }
 
   clearPathAtPlayer() {

@@ -1,5 +1,6 @@
 import ee from 'event-emitter';
 import { isEqual } from 'lodash';
+import TWEEN from 'tween.js';
 
 import Entity from './Entity.js';
 import Cell from './Cell.js';
@@ -25,7 +26,17 @@ class Maze extends Entity {
 
     this.emitter = ee();
 
+    this.transforms = {
+      cellAlpha: 1,
+    };
+
     this.goal = {};
+  }
+
+  tweenCellAlpha(duration, target) {
+    const tween = new TWEEN.Tween(this.transforms)
+      .to({ cellAlpha: target }, duration)
+      .start();
   }
 
   createCells(cellWidth, cellHeight, cellsPerSide) {
@@ -105,16 +116,15 @@ class Maze extends Entity {
   }
 
   update(dt, keys) {
+    TWEEN.update();
     this.handleInput(keys);
-
-    this.cells.each(cell => cell.update(dt));
   }
 
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
 
-    this.cells.each(cell => cell.draw(ctx));
+    this.cells.each(cell => cell.draw(ctx, this.transforms.cellAlpha));
 
     ctx.lineWidth = '2';
     ctx.strokeStyle = 'red';

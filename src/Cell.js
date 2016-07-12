@@ -1,4 +1,4 @@
-import { each } from 'lodash';
+import { each, filter } from 'lodash';
 
 import Entity from './Entity.js';
 import { dirs, delta } from './dirs.js';
@@ -11,11 +11,12 @@ class Cell extends Entity {
     this.pathThickness = 4;
     this.pathOffsetFromCenter = 5;
 
-    this.closeAllPaths();
+    this.paths = {};
   }
 
+  // if no `dir` is given, checks whether any path is open at all
   hasPath(dir) {
-    return !!this.paths[dir];
+    return dir ? !!this.paths[dir] : !!filter(this.paths).length;
   }
 
   openPath(dir) {
@@ -27,8 +28,6 @@ class Cell extends Entity {
   }
 
   drawPath(ctx, dir) {
-    ctx.strokeStyle = 'rgb(255, 255, 255)';
-    ctx.lineWidth = this.pathThickness;
     ctx.beginPath();
 
     const dx = delta[dir].x;
@@ -47,8 +46,10 @@ class Cell extends Entity {
     ctx.stroke();
   }
 
-  drawPaths(ctx) {
+  drawPaths(ctx, alpha) {
     ctx.save();
+    ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+    ctx.lineWidth = this.pathThickness;
 
     each(this.paths, (hasPath, dir) => {
       if (hasPath) {
@@ -59,10 +60,10 @@ class Cell extends Entity {
     ctx.restore();
   }
 
-  drawCenter(ctx) {
+  drawCenter(ctx,alpha) {
     ctx.save();
     ctx.translate(this.cx, this.cy);
-    ctx.fillStyle = 'rgb(180,180,180)';
+    ctx.fillStyle = `rgba(180,180,180,${alpha})`;
 
     ctx.fillRect(
       -this.centerSize / 2,
@@ -84,10 +85,13 @@ class Cell extends Entity {
     ctx.restore();
   }
 
-  draw(ctx) {
+  draw(ctx, alpha) {
     this.drawBackground(ctx);
-    this.drawCenter(ctx);
-    this.drawPaths(ctx);
+
+    if (this.hasPath()) {
+      this.drawCenter(ctx, alpha);
+      this.drawPaths(ctx, alpha);
+    }
   }
 }
 
