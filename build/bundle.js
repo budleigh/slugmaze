@@ -16524,7 +16524,7 @@ var Cell = function (_Entity) {
 
 exports.default = Cell;
 
-},{"./Entity.js":3,"./dirs.js":8,"lodash":1}],3:[function(require,module,exports){
+},{"./Entity.js":3,"./dirs.js":9,"lodash":1}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16636,7 +16636,67 @@ var Game = function () {
 
 exports.default = Game;
 
-},{"./Input.js":5,"./Maze.js":6}],5:[function(require,module,exports){
+},{"./Input.js":6,"./Maze.js":7}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Grid = function () {
+  function Grid(w, h) {
+    _classCallCheck(this, Grid);
+
+    this.w = w;
+    this.h = h;
+    this.data = new Array(w * h);
+  }
+
+  _createClass(Grid, [{
+    key: "coordIdx",
+    value: function coordIdx(x, y) {
+      return x * this.h + y;
+    }
+  }, {
+    key: "read",
+    value: function read(x, y) {
+      return this.data[this.coordIdx(x, y)];
+    }
+  }, {
+    key: "write",
+    value: function write(x, y, val) {
+      this.data[this.coordIdx(x, y)] = val;
+    }
+  }, {
+    key: "each",
+    value: function each(iterator) {
+      for (var x = 0; x < this.w; x++) {
+        for (var y = 0; y < this.h; y++) {
+          iterator(this.read(x, y), x, y);
+        }
+      }
+    }
+  }, {
+    key: "writeEach",
+    value: function writeEach(iterator) {
+      var _this = this;
+
+      this.each(function (val, x, y) {
+        return _this.write(x, y, iterator(val, x, y));
+      });
+    }
+  }]);
+
+  return Grid;
+}();
+
+exports.default = Grid;
+
+},{}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16721,7 +16781,7 @@ var Input = function () {
 
 exports.default = Input;
 
-},{"lodash":1}],6:[function(require,module,exports){
+},{"lodash":1}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16741,6 +16801,10 @@ var _Cell2 = _interopRequireDefault(_Cell);
 var _Player = require('./Player.js');
 
 var _Player2 = _interopRequireDefault(_Player);
+
+var _Grid = require('./Grid.js');
+
+var _Grid2 = _interopRequireDefault(_Grid);
 
 var _dirs = require('./dirs.js');
 
@@ -16767,40 +16831,29 @@ var Maze = function (_Entity) {
 
     _this.player = _this.createPlayer(1, 2);
 
-    _this.cells[2][2].openPath('L');
-    _this.cells[2][2].openPath('D');
-    _this.cells[2][2].openPath('U');
-    _this.cells[2][2].openPath('R');
+    var cell = _this.cells.read(2, 2);
+    cell.openPath('L');
+    cell.openPath('D');
+    cell.openPath('U');
+    cell.openPath('R');
     return _this;
   }
 
   _createClass(Maze, [{
     key: 'createCells',
     value: function createCells(cellWidth, cellHeight, cellsPerSide) {
-      var result = [];
+      var result = new _Grid2.default(cellsPerSide, cellsPerSide);
 
-      for (var i = 0; i < cellsPerSide; i++) {
-        result[i] = [];
-        for (var j = 0; j < cellsPerSide; j++) {
-          result[i][j] = new _Cell2.default(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
-        }
-      }
+      result.writeEach(function (__, x, y) {
+        return new _Cell2.default(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+      });
 
       return result;
     }
   }, {
     key: 'createPlayer',
     value: function createPlayer(gridX, gridY) {
-      return new _Player2.default(this.cells[gridX][gridY], gridX, gridY, 12, 12);
-    }
-  }, {
-    key: 'forEachCell',
-    value: function forEachCell(callback) {
-      for (var i = 0; i < this.cellsPerSide; i++) {
-        for (var j = 0; j < this.cellsPerSide; j++) {
-          callback(this.cells[i][j], i, j);
-        }
-      }
+      return new _Player2.default(this.cells.read(gridX, gridY), gridX, gridY, 12, 12);
     }
   }, {
     key: 'handleInput',
@@ -16813,14 +16866,14 @@ var Maze = function (_Entity) {
       var gridX = this.player.gridX + gridDelta.x;
       var gridY = this.player.gridY + gridDelta.y;
 
-      this.player.moveToCell(this.cells[gridX][gridY], gridX, gridY);
+      this.player.moveToCell(this.cells.read(gridX, gridY), gridX, gridY);
     }
   }, {
     key: 'update',
     value: function update(dt, keys) {
       this.handleInput(keys);
 
-      this.forEachCell(function (cell) {
+      this.cells.each(function (cell) {
         return cell.update(dt);
       });
     }
@@ -16830,7 +16883,7 @@ var Maze = function (_Entity) {
       ctx.save();
       ctx.translate(this.x, this.y);
 
-      this.forEachCell(function (cell) {
+      this.cells.each(function (cell) {
         return cell.draw(ctx);
       });
 
@@ -16849,7 +16902,7 @@ var Maze = function (_Entity) {
 
 exports.default = Maze;
 
-},{"./Cell.js":2,"./Entity.js":3,"./Player.js":7,"./dirs.js":8}],7:[function(require,module,exports){
+},{"./Cell.js":2,"./Entity.js":3,"./Grid.js":5,"./Player.js":8,"./dirs.js":9}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16909,7 +16962,7 @@ var Player = function (_Entity) {
 
 exports.default = Player;
 
-},{"./Entity.js":3}],8:[function(require,module,exports){
+},{"./Entity.js":3}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16933,7 +16986,7 @@ var delta = {
 exports.dirs = dirs;
 exports.delta = delta;
 
-},{"lodash":1}],9:[function(require,module,exports){
+},{"lodash":1}],10:[function(require,module,exports){
 'use strict';
 
 var _game = require('./game.js');
@@ -16964,4 +17017,4 @@ function gameloop(timestamp) {
 
 requestAnimationFrame(gameloop);
 
-},{"./game.js":4}]},{},[9]);
+},{"./game.js":4}]},{},[10]);

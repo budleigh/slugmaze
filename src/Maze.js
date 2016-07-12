@@ -1,6 +1,7 @@
 import Entity from './Entity.js';
 import Cell from './Cell.js';
 import Player from './Player.js';
+import Grid from './Grid.js';
 import { delta } from './dirs.js';
 
 class Maze extends Entity {
@@ -13,40 +14,30 @@ class Maze extends Entity {
 
     this.player = this.createPlayer(1, 2);
 
-    this.cells[2][2].openPath('L')
-    this.cells[2][2].openPath('D')
-    this.cells[2][2].openPath('U')
-    this.cells[2][2].openPath('R')
+    const cell = this.cells.read(2, 2);
+    cell.openPath('L');
+    cell.openPath('D');
+    cell.openPath('U');
+    cell.openPath('R');
   }
 
   createCells(cellWidth, cellHeight, cellsPerSide) {
-    var result = [];
+    const result = new Grid(cellsPerSide, cellsPerSide);
 
-    for (let i = 0; i < cellsPerSide; i++) {
-      result[i] = [];
-      for (let j = 0; j < cellsPerSide; j++) {
-        result[i][j] = new Cell(
-          i * cellWidth,
-          j * cellHeight,
-          cellWidth,
-          cellHeight
-        );
-      }
-    }
+    result.writeEach((__, x, y) => {
+      return new Cell(
+        x * cellWidth,
+        y * cellHeight,
+        cellWidth,
+        cellHeight
+      );
+    });
 
     return result;
   }
 
   createPlayer(gridX, gridY) {
-    return new Player(this.cells[gridX][gridY], gridX, gridY, 12, 12);
-  }
-
-  forEachCell(callback) {
-    for (let i = 0; i < this.cellsPerSide; i++) {
-      for (let j = 0; j < this.cellsPerSide; j++) {
-        callback(this.cells[i][j], i, j);
-      }
-    }
+    return new Player(this.cells.read(gridX, gridY), gridX, gridY, 12, 12);
   }
 
   handleInput(keys) {
@@ -58,20 +49,20 @@ class Maze extends Entity {
     const gridX = this.player.gridX + gridDelta.x;
     const gridY = this.player.gridY + gridDelta.y;
 
-    this.player.moveToCell(this.cells[gridX][gridY], gridX, gridY);
+    this.player.moveToCell(this.cells.read(gridX, gridY), gridX, gridY);
   }
 
   update(dt, keys) {
     this.handleInput(keys);
 
-    this.forEachCell(cell => cell.update(dt));
+    this.cells.each(cell => cell.update(dt));
   }
 
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
 
-    this.forEachCell(cell => cell.draw(ctx));
+    this.cells.each(cell => cell.draw(ctx));
 
     ctx.lineWidth = '2';
     ctx.strokeStyle = 'red';
