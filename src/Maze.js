@@ -38,6 +38,10 @@ class Maze extends Entity {
     return new Player(this.cells.read(gridX, gridY), gridX, gridY, 12, 12);
   }
 
+  getPlayerGridCoords() {
+    return this.player.getGridCoords();
+  }
+
   closeAllPaths() {
     this.cells.each(cell => cell.closeAllPaths());
   }

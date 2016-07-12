@@ -1,4 +1,4 @@
-import Maze from './Maze.js';
+import Director from './Director.js';
 import Input from './Input.js';
 
 class Game {
@@ -8,17 +8,17 @@ class Game {
 
     this.input = new Input();
 
-    this.maze = new Maze(50, 50, 90, 90, 6);
+    this.director = new Director();
   }
 
   update(dt) {
     this.input.update();
-    this.maze.update(dt, this.input.getPressedKeys());
+    this.director.update(dt, this.input.getPressedKeys());
   }
 
   draw(ctx) {
     ctx.clearRect(0, 0, this.w, this.h);
-    this.maze.draw(ctx);
+    this.director.draw(ctx);
   }
 }
 

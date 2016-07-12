@@ -16524,7 +16524,58 @@ var Cell = function (_Entity) {
 
 exports.default = Cell;
 
-},{"./Entity.js":3,"./dirs.js":10,"lodash":1}],3:[function(require,module,exports){
+},{"./Entity.js":4,"./dirs.js":11,"lodash":1}],3:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Path = require('./Path.js');
+
+var _Path2 = _interopRequireDefault(_Path);
+
+var _Maze = require('./Maze.js');
+
+var _Maze2 = _interopRequireDefault(_Maze);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Director = function () {
+  function Director() {
+    _classCallCheck(this, Director);
+
+    this.maze = new _Maze2.default(50, 50, 90, 90, 6);
+  }
+
+  _createClass(Director, [{
+    key: 'newRound',
+    value: function newRound() {
+      var playerGridCoords = this.maze.getPlayerGridCoords();
+      var path = _Path2.default.random();
+    }
+  }, {
+    key: 'update',
+    value: function update(dt, keys) {
+      this.maze.update(dt, keys);
+    }
+  }, {
+    key: 'draw',
+    value: function draw(ctx) {
+      this.maze.draw(ctx);
+    }
+  }]);
+
+  return Director;
+}();
+
+exports.default = Director;
+
+},{"./Maze.js":8,"./Path.js":9}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16584,7 +16635,7 @@ var Entity = function () {
 
 exports.default = Entity;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16593,9 +16644,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Maze = require('./Maze.js');
+var _Director = require('./Director.js');
 
-var _Maze2 = _interopRequireDefault(_Maze);
+var _Director2 = _interopRequireDefault(_Director);
 
 var _Input = require('./Input.js');
 
@@ -16614,20 +16665,20 @@ var Game = function () {
 
     this.input = new _Input2.default();
 
-    this.maze = new _Maze2.default(50, 50, 90, 90, 6);
+    this.director = new _Director2.default();
   }
 
   _createClass(Game, [{
     key: 'update',
     value: function update(dt) {
       this.input.update();
-      this.maze.update(dt, this.input.getPressedKeys());
+      this.director.update(dt, this.input.getPressedKeys());
     }
   }, {
     key: 'draw',
     value: function draw(ctx) {
       ctx.clearRect(0, 0, this.w, this.h);
-      this.maze.draw(ctx);
+      this.director.draw(ctx);
     }
   }]);
 
@@ -16636,7 +16687,7 @@ var Game = function () {
 
 exports.default = Game;
 
-},{"./Input.js":6,"./Maze.js":7}],5:[function(require,module,exports){
+},{"./Director.js":3,"./Input.js":7}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16706,7 +16757,7 @@ var Grid = function () {
 
 exports.default = Grid;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16791,7 +16842,7 @@ var Input = function () {
 
 exports.default = Input;
 
-},{"lodash":1}],7:[function(require,module,exports){
+},{"lodash":1}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16867,6 +16918,11 @@ var Maze = function (_Entity) {
       return new _Player2.default(this.cells.read(gridX, gridY), gridX, gridY, 12, 12);
     }
   }, {
+    key: 'getPlayerGridCoords',
+    value: function getPlayerGridCoords() {
+      return this.player.getGridCoords();
+    }
+  }, {
     key: 'closeAllPaths',
     value: function closeAllPaths() {
       this.cells.each(function (cell) {
@@ -16937,7 +16993,7 @@ var Maze = function (_Entity) {
 
 exports.default = Maze;
 
-},{"./Cell.js":2,"./Entity.js":3,"./Grid.js":5,"./Path.js":8,"./Player.js":9,"./dirs.js":10}],8:[function(require,module,exports){
+},{"./Cell.js":2,"./Entity.js":4,"./Grid.js":6,"./Path.js":9,"./Player.js":10,"./dirs.js":11}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17038,7 +17094,7 @@ var Path = function () {
 
 exports.default = Path;
 
-},{"./Grid.js":5,"./dirs.js":10,"lodash":1}],9:[function(require,module,exports){
+},{"./Grid.js":6,"./dirs.js":11,"lodash":1}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17106,7 +17162,7 @@ var Player = function (_Entity) {
 
 exports.default = Player;
 
-},{"./Entity.js":3}],10:[function(require,module,exports){
+},{"./Entity.js":4}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17138,7 +17194,7 @@ exports.dirs = dirs;
 exports.oppDirs = oppDirs;
 exports.delta = delta;
 
-},{"lodash":1}],11:[function(require,module,exports){
+},{"lodash":1}],12:[function(require,module,exports){
 'use strict';
 
 var _game = require('./game.js');
@@ -17169,4 +17225,4 @@ function gameloop(timestamp) {
 
 requestAnimationFrame(gameloop);
 
-},{"./game.js":4}]},{},[11]);
+},{"./game.js":5}]},{},[12]);
