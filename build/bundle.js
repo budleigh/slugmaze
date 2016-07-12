@@ -17925,10 +17925,29 @@ var Director = function (_Entity) {
     });
 
     _this.newRound();
+
+    window.setRound = _this.setRound.bind(_this);
+    window.setLives = _this.setLives.bind(_this);
     return _this;
   }
 
+  // debug methods to put on `window`
+
+
   _createClass(Director, [{
+    key: 'setRound',
+    value: function setRound(round) {
+      this.round = round;
+      this.HUD.setRound(round);
+      this.newRound();
+    }
+  }, {
+    key: 'setLives',
+    value: function setLives(lives) {
+      this.lives = lives;
+      this.HUD.setLives(lives);
+    }
+  }, {
     key: 'createMaze',
     value: function createMaze(w, h, cellsPerSide) {
       var mazeSideLength = Math.min(w, h) * .66;
@@ -18917,6 +18936,10 @@ var Path = function () {
 
         tries++;
       }
+
+      // we tried so hard and got so far
+      // but in the end it doesn't even matter
+      return bestPath;
     }
 
     // iterates over the path given start coordinates, passing in the

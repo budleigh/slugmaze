@@ -22,6 +22,21 @@ class Director extends Entity {
     this.maze.emitter.on(events.DIE, () => this.onDie());
 
     this.newRound();
+
+    window.setRound = this.setRound.bind(this);
+    window.setLives = this.setLives.bind(this);
+  }
+
+  // debug methods to put on `window`
+  setRound(round) {
+    this.round = round;
+    this.HUD.setRound(round);
+    this.newRound();
+  }
+
+  setLives(lives) {
+    this.lives = lives;
+    this.HUD.setLives(lives);
   }
 
   createMaze(w, h, cellsPerSide) {
