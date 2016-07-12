@@ -60,7 +60,7 @@ class Director extends Entity {
   killPlayer() {
     this.lives -= 1;
 
-    this.HUD.setLives(this.lives);
+    this.HUD.removeLife();
   }
 
   showPaths(delay = 0, onComplete) {

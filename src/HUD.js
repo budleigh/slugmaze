@@ -34,6 +34,10 @@ class HUD extends Entity {
     this.playerClones = this.createPlayerClones(lives);
   }
 
+  removeLife() {
+    this.playerClones.pop();
+  }
+
   setRound(round) {
     this.round = round;
   }
@@ -70,7 +74,7 @@ class HUD extends Entity {
     ctx.save();
     ctx.translate(this.x, this.y);
 
-    this.drawBorder(ctx);
+    // this.drawBorder(ctx);
     this.drawLives(ctx);
     this.drawRound(ctx);
 

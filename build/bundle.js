@@ -17969,7 +17969,7 @@ var Director = function (_Entity) {
     value: function killPlayer() {
       this.lives -= 1;
 
-      this.HUD.setLives(this.lives);
+      this.HUD.removeLife();
     }
   }, {
     key: 'showPaths',
@@ -18323,6 +18323,11 @@ var HUD = function (_Entity) {
       this.playerClones = this.createPlayerClones(lives);
     }
   }, {
+    key: 'removeLife',
+    value: function removeLife() {
+      this.playerClones.pop();
+    }
+  }, {
     key: 'setRound',
     value: function setRound(round) {
       this.round = round;
@@ -18364,7 +18369,7 @@ var HUD = function (_Entity) {
       ctx.save();
       ctx.translate(this.x, this.y);
 
-      this.drawBorder(ctx);
+      // this.drawBorder(ctx);
       this.drawLives(ctx);
       this.drawRound(ctx);
 
