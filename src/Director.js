@@ -1,14 +1,41 @@
 import Path from './Path.js';
-import Maze from './Maze.js';
+import Maze, { events } from './Maze.js';
 
 class Director {
   constructor() {
-    this.maze = new Maze(50, 50, 90, 90, 6);
+    this.cellsPerSide = 6;
+    this.maze = new Maze(50, 50, 90, 90, this.cellsPerSide);
+    this.newRound();
+
+    this.maze.emitter.on(events.GOAL, () => this.newRound());
   }
 
   newRound() {
-    const playerGridCoords = this.maze.getPlayerGridCoords();
-    const path = Path.random();
+    this.clearPathAtPlayer();
+  }
+
+  clearPathAtPlayer() {
+    // clear off any paths that were already
+    this.maze.closeAllPaths();
+
+    const { x: startX, y: startY } = this.maze.getPlayerGridCoords();
+
+    const path = Path.random(
+      startX,
+      startY,
+      this.cellsPerSide,
+      this.cellsPerSide,
+      6
+    );
+
+    const delta = Path.delta(path);
+
+    this.maze.openPath(startX, startY, path);
+
+    this.maze.setGoal({
+      x: startX + delta.x,
+      y: startY + delta.y,
+    });
   }
 
   update(dt, keys) {

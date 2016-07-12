@@ -14,6 +14,10 @@ class Cell extends Entity {
     this.closeAllPaths();
   }
 
+  hasPath(dir) {
+    return !!this.paths[dir];
+  }
+
   openPath(dir) {
     this.paths[dir] = true;
   }

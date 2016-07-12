@@ -1,9 +1,17 @@
+import ee from 'event-emitter';
+import { isEqual } from 'lodash';
+
 import Entity from './Entity.js';
 import Cell from './Cell.js';
 import Player from './Player.js';
 import Grid from './Grid.js';
 import Path from './Path.js';
 import { delta, dirs, oppDirs } from './dirs.js';
+
+const events = {
+  GOAL: 0,
+  DIE: 1,
+};
 
 class Maze extends Entity {
   constructor(x, y, cellWidth, cellHeight, cellsPerSide) {
@@ -14,6 +22,10 @@ class Maze extends Entity {
 
     this.cells = this.createCells(cellWidth, cellHeight, cellsPerSide);
     this.player = this.createPlayer(1, 2);
+
+    this.emitter = ee();
+
+    this.goal = {};
 
     // testing path drawing
     this.openPath(2, 2, 'DDRRUULUULL');
@@ -42,6 +54,10 @@ class Maze extends Entity {
     return this.player.getGridCoords();
   }
 
+  setGoal(goal) {
+    this.goal = goal;
+  }
+
   closeAllPaths() {
     this.cells.each(cell => cell.closeAllPaths());
   }
@@ -60,6 +76,10 @@ class Maze extends Entity {
     });
   }
 
+  setGoal(goal) {
+    this.goal = goal;
+  }
+
   handleInput(keys) {
     // just worry about one key for now
     const dir = keys[0];
@@ -71,8 +91,13 @@ class Maze extends Entity {
       const gridY = this.player.gridY + gridDelta.y;
 
       this.player.moveToCell(this.cells.read(gridX, gridY), gridX, gridY);
+
+      if (isEqual(this.player.getGridCoords(), this.goal)) {
+        this.emitter.emit(events.GOAL);
+      }
     } else {
       // TODO: kill player here
+      this.emitter.emit(events.DIE);
     }
   }
 
@@ -105,3 +130,4 @@ class Maze extends Entity {
 }
 
 export default Maze;
+export { events };

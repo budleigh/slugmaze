@@ -1,4 +1,339 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
+
+var assign        = require('es5-ext/object/assign')
+  , normalizeOpts = require('es5-ext/object/normalize-options')
+  , isCallable    = require('es5-ext/object/is-callable')
+  , contains      = require('es5-ext/string/#/contains')
+
+  , d;
+
+d = module.exports = function (dscr, value/*, options*/) {
+	var c, e, w, options, desc;
+	if ((arguments.length < 2) || (typeof dscr !== 'string')) {
+		options = value;
+		value = dscr;
+		dscr = null;
+	} else {
+		options = arguments[2];
+	}
+	if (dscr == null) {
+		c = w = true;
+		e = false;
+	} else {
+		c = contains.call(dscr, 'c');
+		e = contains.call(dscr, 'e');
+		w = contains.call(dscr, 'w');
+	}
+
+	desc = { value: value, configurable: c, enumerable: e, writable: w };
+	return !options ? desc : assign(normalizeOpts(options), desc);
+};
+
+d.gs = function (dscr, get, set/*, options*/) {
+	var c, e, options, desc;
+	if (typeof dscr !== 'string') {
+		options = set;
+		set = get;
+		get = dscr;
+		dscr = null;
+	} else {
+		options = arguments[3];
+	}
+	if (get == null) {
+		get = undefined;
+	} else if (!isCallable(get)) {
+		options = get;
+		get = set = undefined;
+	} else if (set == null) {
+		set = undefined;
+	} else if (!isCallable(set)) {
+		options = set;
+		set = undefined;
+	}
+	if (dscr == null) {
+		c = true;
+		e = false;
+	} else {
+		c = contains.call(dscr, 'c');
+		e = contains.call(dscr, 'e');
+	}
+
+	desc = { get: get, set: set, configurable: c, enumerable: e };
+	return !options ? desc : assign(normalizeOpts(options), desc);
+};
+
+},{"es5-ext/object/assign":2,"es5-ext/object/is-callable":5,"es5-ext/object/normalize-options":9,"es5-ext/string/#/contains":12}],2:[function(require,module,exports){
+'use strict';
+
+module.exports = require('./is-implemented')()
+	? Object.assign
+	: require('./shim');
+
+},{"./is-implemented":3,"./shim":4}],3:[function(require,module,exports){
+'use strict';
+
+module.exports = function () {
+	var assign = Object.assign, obj;
+	if (typeof assign !== 'function') return false;
+	obj = { foo: 'raz' };
+	assign(obj, { bar: 'dwa' }, { trzy: 'trzy' });
+	return (obj.foo + obj.bar + obj.trzy) === 'razdwatrzy';
+};
+
+},{}],4:[function(require,module,exports){
+'use strict';
+
+var keys  = require('../keys')
+  , value = require('../valid-value')
+
+  , max = Math.max;
+
+module.exports = function (dest, src/*, …srcn*/) {
+	var error, i, l = max(arguments.length, 2), assign;
+	dest = Object(value(dest));
+	assign = function (key) {
+		try { dest[key] = src[key]; } catch (e) {
+			if (!error) error = e;
+		}
+	};
+	for (i = 1; i < l; ++i) {
+		src = arguments[i];
+		keys(src).forEach(assign);
+	}
+	if (error !== undefined) throw error;
+	return dest;
+};
+
+},{"../keys":6,"../valid-value":11}],5:[function(require,module,exports){
+// Deprecated
+
+'use strict';
+
+module.exports = function (obj) { return typeof obj === 'function'; };
+
+},{}],6:[function(require,module,exports){
+'use strict';
+
+module.exports = require('./is-implemented')()
+	? Object.keys
+	: require('./shim');
+
+},{"./is-implemented":7,"./shim":8}],7:[function(require,module,exports){
+'use strict';
+
+module.exports = function () {
+	try {
+		Object.keys('primitive');
+		return true;
+	} catch (e) { return false; }
+};
+
+},{}],8:[function(require,module,exports){
+'use strict';
+
+var keys = Object.keys;
+
+module.exports = function (object) {
+	return keys(object == null ? object : Object(object));
+};
+
+},{}],9:[function(require,module,exports){
+'use strict';
+
+var forEach = Array.prototype.forEach, create = Object.create;
+
+var process = function (src, obj) {
+	var key;
+	for (key in src) obj[key] = src[key];
+};
+
+module.exports = function (options/*, …options*/) {
+	var result = create(null);
+	forEach.call(arguments, function (options) {
+		if (options == null) return;
+		process(Object(options), result);
+	});
+	return result;
+};
+
+},{}],10:[function(require,module,exports){
+'use strict';
+
+module.exports = function (fn) {
+	if (typeof fn !== 'function') throw new TypeError(fn + " is not a function");
+	return fn;
+};
+
+},{}],11:[function(require,module,exports){
+'use strict';
+
+module.exports = function (value) {
+	if (value == null) throw new TypeError("Cannot use null or undefined");
+	return value;
+};
+
+},{}],12:[function(require,module,exports){
+'use strict';
+
+module.exports = require('./is-implemented')()
+	? String.prototype.contains
+	: require('./shim');
+
+},{"./is-implemented":13,"./shim":14}],13:[function(require,module,exports){
+'use strict';
+
+var str = 'razdwatrzy';
+
+module.exports = function () {
+	if (typeof str.contains !== 'function') return false;
+	return ((str.contains('dwa') === true) && (str.contains('foo') === false));
+};
+
+},{}],14:[function(require,module,exports){
+'use strict';
+
+var indexOf = String.prototype.indexOf;
+
+module.exports = function (searchString/*, position*/) {
+	return indexOf.call(this, searchString, arguments[1]) > -1;
+};
+
+},{}],15:[function(require,module,exports){
+'use strict';
+
+var d        = require('d')
+  , callable = require('es5-ext/object/valid-callable')
+
+  , apply = Function.prototype.apply, call = Function.prototype.call
+  , create = Object.create, defineProperty = Object.defineProperty
+  , defineProperties = Object.defineProperties
+  , hasOwnProperty = Object.prototype.hasOwnProperty
+  , descriptor = { configurable: true, enumerable: false, writable: true }
+
+  , on, once, off, emit, methods, descriptors, base;
+
+on = function (type, listener) {
+	var data;
+
+	callable(listener);
+
+	if (!hasOwnProperty.call(this, '__ee__')) {
+		data = descriptor.value = create(null);
+		defineProperty(this, '__ee__', descriptor);
+		descriptor.value = null;
+	} else {
+		data = this.__ee__;
+	}
+	if (!data[type]) data[type] = listener;
+	else if (typeof data[type] === 'object') data[type].push(listener);
+	else data[type] = [data[type], listener];
+
+	return this;
+};
+
+once = function (type, listener) {
+	var once, self;
+
+	callable(listener);
+	self = this;
+	on.call(this, type, once = function () {
+		off.call(self, type, once);
+		apply.call(listener, this, arguments);
+	});
+
+	once.__eeOnceListener__ = listener;
+	return this;
+};
+
+off = function (type, listener) {
+	var data, listeners, candidate, i;
+
+	callable(listener);
+
+	if (!hasOwnProperty.call(this, '__ee__')) return this;
+	data = this.__ee__;
+	if (!data[type]) return this;
+	listeners = data[type];
+
+	if (typeof listeners === 'object') {
+		for (i = 0; (candidate = listeners[i]); ++i) {
+			if ((candidate === listener) ||
+					(candidate.__eeOnceListener__ === listener)) {
+				if (listeners.length === 2) data[type] = listeners[i ? 0 : 1];
+				else listeners.splice(i, 1);
+			}
+		}
+	} else {
+		if ((listeners === listener) ||
+				(listeners.__eeOnceListener__ === listener)) {
+			delete data[type];
+		}
+	}
+
+	return this;
+};
+
+emit = function (type) {
+	var i, l, listener, listeners, args;
+
+	if (!hasOwnProperty.call(this, '__ee__')) return;
+	listeners = this.__ee__[type];
+	if (!listeners) return;
+
+	if (typeof listeners === 'object') {
+		l = arguments.length;
+		args = new Array(l - 1);
+		for (i = 1; i < l; ++i) args[i - 1] = arguments[i];
+
+		listeners = listeners.slice();
+		for (i = 0; (listener = listeners[i]); ++i) {
+			apply.call(listener, this, args);
+		}
+	} else {
+		switch (arguments.length) {
+		case 1:
+			call.call(listeners, this);
+			break;
+		case 2:
+			call.call(listeners, this, arguments[1]);
+			break;
+		case 3:
+			call.call(listeners, this, arguments[1], arguments[2]);
+			break;
+		default:
+			l = arguments.length;
+			args = new Array(l - 1);
+			for (i = 1; i < l; ++i) {
+				args[i - 1] = arguments[i];
+			}
+			apply.call(listeners, this, args);
+		}
+	}
+};
+
+methods = {
+	on: on,
+	once: once,
+	off: off,
+	emit: emit
+};
+
+descriptors = {
+	on: d(on),
+	once: d(once),
+	off: d(off),
+	emit: d(emit)
+};
+
+base = defineProperties({}, descriptors);
+
+module.exports = exports = function (o) {
+	return (o == null) ? create(base) : defineProperties(Object(o), descriptors);
+};
+exports.methods = methods;
+
+},{"d":1,"es5-ext/object/valid-callable":10}],16:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -16406,7 +16741,7 @@
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],2:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16448,6 +16783,11 @@ var Cell = function (_Entity) {
   }
 
   _createClass(Cell, [{
+    key: 'hasPath',
+    value: function hasPath(dir) {
+      return !!this.paths[dir];
+    }
+  }, {
     key: 'openPath',
     value: function openPath(dir) {
       this.paths[dir] = true;
@@ -16524,7 +16864,7 @@ var Cell = function (_Entity) {
 
 exports.default = Cell;
 
-},{"./Entity.js":4,"./dirs.js":11,"lodash":1}],3:[function(require,module,exports){
+},{"./Entity.js":19,"./dirs.js":26,"lodash":16}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16547,16 +16887,46 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Director = function () {
   function Director() {
+    var _this = this;
+
     _classCallCheck(this, Director);
 
-    this.maze = new _Maze2.default(50, 50, 90, 90, 6);
+    this.cellsPerSide = 6;
+    this.maze = new _Maze2.default(50, 50, 90, 90, this.cellsPerSide);
+    this.newRound();
+
+    this.maze.emitter.on(_Maze.events.GOAL, function () {
+      return _this.newRound();
+    });
   }
 
   _createClass(Director, [{
     key: 'newRound',
     value: function newRound() {
-      var playerGridCoords = this.maze.getPlayerGridCoords();
-      var path = _Path2.default.random();
+      this.clearPathAtPlayer();
+    }
+  }, {
+    key: 'clearPathAtPlayer',
+    value: function clearPathAtPlayer() {
+      // clear off any paths that were already
+      this.maze.closeAllPaths();
+
+      var _maze$getPlayerGridCo = this.maze.getPlayerGridCoords();
+
+      var startX = _maze$getPlayerGridCo.x;
+      var startY = _maze$getPlayerGridCo.y;
+
+
+      var path = _Path2.default.random(startX, startY, this.cellsPerSide, this.cellsPerSide, 6);
+
+      var delta = _Path2.default.delta(path);
+
+      this.maze.openPath(startX, startY, path);
+
+      this.maze.setGoal({
+        x: startX + delta.x,
+        y: startY + delta.y
+      });
     }
   }, {
     key: 'update',
@@ -16575,7 +16945,7 @@ var Director = function () {
 
 exports.default = Director;
 
-},{"./Maze.js":8,"./Path.js":9}],4:[function(require,module,exports){
+},{"./Maze.js":23,"./Path.js":24}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16635,7 +17005,7 @@ var Entity = function () {
 
 exports.default = Entity;
 
-},{}],5:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16687,7 +17057,7 @@ var Game = function () {
 
 exports.default = Game;
 
-},{"./Director.js":3,"./Input.js":7}],6:[function(require,module,exports){
+},{"./Director.js":18,"./Input.js":22}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16757,7 +17127,7 @@ var Grid = function () {
 
 exports.default = Grid;
 
-},{}],7:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16842,14 +17212,21 @@ var Input = function () {
 
 exports.default = Input;
 
-},{"lodash":1}],8:[function(require,module,exports){
+},{"lodash":16}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.events = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _eventEmitter = require('event-emitter');
+
+var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
+
+var _lodash = require('lodash');
 
 var _Entity2 = require('./Entity.js');
 
@@ -16881,6 +17258,11 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var events = {
+  GOAL: 0,
+  DIE: 1
+};
+
 var Maze = function (_Entity) {
   _inherits(Maze, _Entity);
 
@@ -16895,6 +17277,10 @@ var Maze = function (_Entity) {
 
     _this.cells = _this.createCells(cellWidth, cellHeight, cellsPerSide);
     _this.player = _this.createPlayer(1, 2);
+
+    _this.emitter = (0, _eventEmitter2.default)();
+
+    _this.goal = {};
 
     // testing path drawing
     _this.openPath(2, 2, 'DDRRUULUULL');
@@ -16923,6 +17309,11 @@ var Maze = function (_Entity) {
       return this.player.getGridCoords();
     }
   }, {
+    key: 'setGoal',
+    value: function setGoal(goal) {
+      this.goal = goal;
+    }
+  }, {
     key: 'closeAllPaths',
     value: function closeAllPaths() {
       this.cells.each(function (cell) {
@@ -16947,17 +17338,36 @@ var Maze = function (_Entity) {
       });
     }
   }, {
+    key: 'setGoal',
+    value: function setGoal(goal) {
+      this.goal = goal;
+    }
+  }, {
     key: 'handleInput',
     value: function handleInput(keys) {
       // just worry about one key for now
-      var key = keys[0];
-      if (!key) return;
+      var dir = keys[0];
+      if (!dir) return;
 
-      var gridDelta = _dirs.delta[key];
-      var gridX = this.player.gridX + gridDelta.x;
-      var gridY = this.player.gridY + gridDelta.y;
+      if (this.isValidInput(dir)) {
+        var gridDelta = _dirs.delta[dir];
+        var gridX = this.player.gridX + gridDelta.x;
+        var gridY = this.player.gridY + gridDelta.y;
 
-      this.player.moveToCell(this.cells.read(gridX, gridY), gridX, gridY);
+        this.player.moveToCell(this.cells.read(gridX, gridY), gridX, gridY);
+
+        if ((0, _lodash.isEqual)(this.player.getGridCoords(), this.goal)) {
+          this.emitter.emit(events.GOAL);
+        }
+      } else {
+        // TODO: kill player here
+        this.emitter.emit(events.DIE);
+      }
+    }
+  }, {
+    key: 'isValidInput',
+    value: function isValidInput(dir) {
+      return this.cells.read(this.player.gridX, this.player.gridY).hasPath(dir);
     }
   }, {
     key: 'update',
@@ -16992,8 +17402,9 @@ var Maze = function (_Entity) {
 }(_Entity3.default);
 
 exports.default = Maze;
+exports.events = events;
 
-},{"./Cell.js":2,"./Entity.js":4,"./Grid.js":6,"./Path.js":9,"./Player.js":10,"./dirs.js":11}],9:[function(require,module,exports){
+},{"./Cell.js":17,"./Entity.js":19,"./Grid.js":21,"./Path.js":24,"./Player.js":25,"./dirs.js":26,"event-emitter":15,"lodash":16}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17087,6 +17498,18 @@ var Path = function () {
       // so we need to hit it manually at the end
       iterator(x, y, path.length);
     }
+  }, {
+    key: 'delta',
+    value: function delta(path) {
+      var result = void 0;
+
+      // this is reeeeeeeeeeally stupid but i'll take it
+      Path.each(0, 0, path, function (x, y, idx) {
+        if (idx === path.length) result = { x: x, y: y };
+      });
+
+      return result;
+    }
   }]);
 
   return Path;
@@ -17094,7 +17517,7 @@ var Path = function () {
 
 exports.default = Path;
 
-},{"./Grid.js":6,"./dirs.js":11,"lodash":1}],10:[function(require,module,exports){
+},{"./Grid.js":21,"./dirs.js":26,"lodash":16}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17162,7 +17585,7 @@ var Player = function (_Entity) {
 
 exports.default = Player;
 
-},{"./Entity.js":4}],11:[function(require,module,exports){
+},{"./Entity.js":19}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17194,7 +17617,7 @@ exports.dirs = dirs;
 exports.oppDirs = oppDirs;
 exports.delta = delta;
 
-},{"lodash":1}],12:[function(require,module,exports){
+},{"lodash":16}],27:[function(require,module,exports){
 'use strict';
 
 var _game = require('./game.js');
@@ -17225,4 +17648,4 @@ function gameloop(timestamp) {
 
 requestAnimationFrame(gameloop);
 
-},{"./game.js":5}]},{},[12]);
+},{"./game.js":20}]},{},[27]);
