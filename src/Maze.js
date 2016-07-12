@@ -7,7 +7,7 @@ import Cell from './Cell.js';
 import Player from './Player.js';
 import Grid from './Grid.js';
 import Path from './Path.js';
-import { delta, dirs, oppDirs } from './dirs.js';
+import { delta, dirs, oppDirs, rotate } from './dirs.js';
 
 const events = {
   GOAL: 0,
@@ -29,6 +29,11 @@ class Maze extends Entity {
 
     this.transforms = {
       cellAlpha: 0,
+      rotation: 0,
+    };
+
+    this.inputTransform = {
+      rotation: 0,
     };
 
     this.goal = {};
@@ -41,6 +46,21 @@ class Maze extends Entity {
     return new TWEEN.Tween(this.transforms)
       .to({ cellAlpha: target }, duration)
       .start();
+  }
+
+  tweenRotation(duration, ccwQuarterTurns) {
+    const rotation = this.transforms.rotation + ccwQuarterTurns * Math.PI / 2;
+
+    return new TWEEN.Tween(this.transforms)
+      .to({ rotation }, duration)
+      .start();
+  }
+
+  applyInputRotation(ccwQuarterTurns) {
+    // add 16 to avoid ending up with a negative modulus.
+    // this is somehow the nicest solution...
+    this.inputTransform.rotation += ccwQuarterTurns + 16;
+    this.inputTransform.rotation %= 4;
   }
 
   createCells(cellWidth, cellHeight, cellsPerSide) {
@@ -96,12 +116,22 @@ class Maze extends Entity {
     this.goal = goal;
   }
 
+  applyInputTransform(dir) {
+    let result = dir;
+
+    result = rotate(result, this.inputTransform.rotation);
+
+    return result;
+  }
+
   handleInput(keys) {
     if(!this.playerCanMove) return;
 
     // just worry about one key for now
-    const dir = keys[0];
-    if (!dir) return;
+    if (!keys.length) return;
+    const dir = this.applyInputTransform(keys[0]);
+
+    console.log({ dir })
 
     if (this.isValidInput(dir)) {
       const gridDelta = delta[dir];
@@ -137,9 +167,15 @@ class Maze extends Entity {
     ctx.strokeRect(0, 0, this.w, this.h);
   }
 
+  applyGraphicalTransforms(ctx) {
+    ctx.translate(this.cx, this.cy);
+    ctx.rotate(this.transforms.rotation);
+    ctx.translate(this.x - this.cx, this.y - this.cy);
+  }
+
   draw(ctx) {
     ctx.save();
-    ctx.translate(this.x, this.y);
+    this.applyGraphicalTransforms(ctx);
 
     this.cells.each(cell => cell.draw(ctx, this.transforms.cellAlpha));
     this.drawBorder(ctx);

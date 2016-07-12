@@ -7,6 +7,8 @@ const dirs = mapKeys([
   'U',
 ], v => v);
 
+const orderedDirs = [dirs.L, dirs.D, dirs.R, dirs.U];
+
 const oppDirs = {
   L: 'R',
   R: 'L',
@@ -21,8 +23,17 @@ const delta = {
   D: { x: 0, y: 1 },
 };
 
+function rotate(dir, turns) {
+  const index = orderedDirs.indexOf(dir);
+  const resultIndex = (((index + turns) % 4) + 4) % 4;
+
+  return orderedDirs[resultIndex];
+}
+
 export {
   dirs,
+  orderedDirs,
   oppDirs,
   delta,
+  rotate,
 };

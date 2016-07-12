@@ -1,3 +1,5 @@
+import { sample } from 'lodash';
+
 import Entity from './Entity.js';
 import Path from './Path.js';
 import Maze, { events } from './Maze.js';
@@ -27,7 +29,11 @@ class Director extends Entity {
   newRound() {
     this.clearPathAtPlayer();
     this.maze.setPlayerMobility(false);
-    this.showPaths(() => this.maze.setPlayerMobility(true));
+    this.showPaths(() => {
+      this.rotateMaze(() => {
+        this.maze.setPlayerMobility(true)
+      });
+    });
   }
 
   showPaths(callback) {
@@ -38,6 +44,16 @@ class Director extends Entity {
     this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(() => {
       this.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(callback);
     });
+  }
+
+  rotateMaze(callback) {
+    const duration = 750;
+    const turns = sample([-2, -1, 1, 2]);
+
+    this.maze.tweenRotation(duration, turns).onComplete(() => {
+      this.maze.applyInputRotation(turns);
+      callback();
+    })
   }
 
   clearPathAtPlayer() {

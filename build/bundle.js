@@ -17870,6 +17870,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _lodash = require('lodash');
+
 var _Entity2 = require('./Entity.js');
 
 var _Entity3 = _interopRequireDefault(_Entity2);
@@ -17928,7 +17930,9 @@ var Director = function (_Entity) {
       this.clearPathAtPlayer();
       this.maze.setPlayerMobility(false);
       this.showPaths(function () {
-        return _this2.maze.setPlayerMobility(true);
+        _this2.rotateMaze(function () {
+          _this2.maze.setPlayerMobility(true);
+        });
       });
     }
   }, {
@@ -17942,6 +17946,19 @@ var Director = function (_Entity) {
       // yuck
       this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
         _this3.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(callback);
+      });
+    }
+  }, {
+    key: 'rotateMaze',
+    value: function rotateMaze(callback) {
+      var _this4 = this;
+
+      var duration = 750;
+      var turns = (0, _lodash.sample)([-2, -1, 1, 2]);
+
+      this.maze.tweenRotation(duration, turns).onComplete(function () {
+        _this4.maze.applyInputRotation(turns);
+        callback();
       });
     }
   }, {
@@ -17984,7 +18001,7 @@ var Director = function (_Entity) {
 
 exports.default = Director;
 
-},{"./Entity.js":21,"./Maze.js":25,"./Path.js":26}],21:[function(require,module,exports){
+},{"./Entity.js":21,"./Maze.js":25,"./Path.js":26,"lodash":16}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18340,7 +18357,12 @@ var Maze = function (_Entity) {
     _this.emitter = (0, _eventEmitter2.default)();
 
     _this.transforms = {
-      cellAlpha: 0
+      cellAlpha: 0,
+      rotation: 0
+    };
+
+    _this.inputTransform = {
+      rotation: 0
     };
 
     _this.goal = {};
@@ -18354,6 +18376,21 @@ var Maze = function (_Entity) {
       // it sees on construction, rather than whatever it might be when we call
       // `.start()`. this is really REALLY vile and they should be ashamed
       return new _tween2.default.Tween(this.transforms).to({ cellAlpha: target }, duration).start();
+    }
+  }, {
+    key: 'tweenRotation',
+    value: function tweenRotation(duration, ccwQuarterTurns) {
+      var rotation = this.transforms.rotation + ccwQuarterTurns * Math.PI / 2;
+
+      return new _tween2.default.Tween(this.transforms).to({ rotation: rotation }, duration).start();
+    }
+  }, {
+    key: 'applyInputRotation',
+    value: function applyInputRotation(ccwQuarterTurns) {
+      // add 16 to avoid ending up with a negative modulus.
+      // this is somehow the nicest solution...
+      this.inputTransform.rotation += ccwQuarterTurns + 16;
+      this.inputTransform.rotation %= 4;
     }
   }, {
     key: 'createCells',
@@ -18416,13 +18453,24 @@ var Maze = function (_Entity) {
       this.goal = goal;
     }
   }, {
+    key: 'applyInputTransform',
+    value: function applyInputTransform(dir) {
+      var result = dir;
+
+      result = (0, _dirs.rotate)(result, this.inputTransform.rotation);
+
+      return result;
+    }
+  }, {
     key: 'handleInput',
     value: function handleInput(keys) {
       if (!this.playerCanMove) return;
 
       // just worry about one key for now
-      var dir = keys[0];
-      if (!dir) return;
+      if (!keys.length) return;
+      var dir = this.applyInputTransform(keys[0]);
+
+      console.log({ dir: dir });
 
       if (this.isValidInput(dir)) {
         var gridDelta = _dirs.delta[dir];
@@ -18459,12 +18507,19 @@ var Maze = function (_Entity) {
       ctx.strokeRect(0, 0, this.w, this.h);
     }
   }, {
+    key: 'applyGraphicalTransforms',
+    value: function applyGraphicalTransforms(ctx) {
+      ctx.translate(this.cx, this.cy);
+      ctx.rotate(this.transforms.rotation);
+      ctx.translate(this.x - this.cx, this.y - this.cy);
+    }
+  }, {
     key: 'draw',
     value: function draw(ctx) {
       var _this3 = this;
 
       ctx.save();
-      ctx.translate(this.x, this.y);
+      this.applyGraphicalTransforms(ctx);
 
       this.cells.each(function (cell) {
         return cell.draw(ctx, _this3.transforms.cellAlpha);
@@ -18677,13 +18732,15 @@ exports.default = Player;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.delta = exports.oppDirs = exports.dirs = undefined;
+exports.rotate = exports.delta = exports.oppDirs = exports.orderedDirs = exports.dirs = undefined;
 
 var _lodash = require('lodash');
 
 var dirs = (0, _lodash.mapKeys)(['L', 'D', 'R', 'U'], function (v) {
   return v;
 });
+
+var orderedDirs = [dirs.L, dirs.D, dirs.R, dirs.U];
 
 var oppDirs = {
   L: 'R',
@@ -18699,9 +18756,18 @@ var delta = {
   D: { x: 0, y: 1 }
 };
 
+function rotate(dir, turns) {
+  var index = orderedDirs.indexOf(dir);
+  var resultIndex = ((index + turns) % 4 + 4) % 4;
+
+  return orderedDirs[resultIndex];
+}
+
 exports.dirs = dirs;
+exports.orderedDirs = orderedDirs;
 exports.oppDirs = oppDirs;
 exports.delta = delta;
+exports.rotate = rotate;
 
 },{"lodash":16}],29:[function(require,module,exports){
 'use strict';
