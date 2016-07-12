@@ -17642,6 +17642,57 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _tween = require('tween.js');
+
+var _tween2 = _interopRequireDefault(_tween);
+
+var _Entity2 = require('./Entity');
+
+var _Entity3 = _interopRequireDefault(_Entity2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Background = function (_Entity) {
+  _inherits(Background, _Entity);
+
+  function Background(w, h) {
+    _classCallCheck(this, Background);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(Background).call(this, 0, 0, w, h));
+  }
+
+  _createClass(Background, [{
+    key: 'draw',
+    value: function draw(ctx) {
+      ctx.save();
+      ctx.fillStyle = 'black';
+
+      ctx.fillRect(0, 0, this.w, this.h);
+
+      ctx.restore();
+    }
+  }]);
+
+  return Background;
+}(_Entity3.default);
+
+exports.default = Background;
+
+},{"./Entity":21,"tween.js":17}],19:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _lodash = require('lodash');
 
 var _Entity2 = require('./Entity.js');
@@ -17762,7 +17813,7 @@ var Cell = function (_Entity) {
 
 exports.default = Cell;
 
-},{"./Entity.js":20,"./dirs.js":27,"lodash":16}],19:[function(require,module,exports){
+},{"./Entity.js":21,"./dirs.js":28,"lodash":16}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17879,7 +17930,7 @@ var Director = function (_Entity) {
 
 exports.default = Director;
 
-},{"./Entity.js":20,"./Maze.js":24,"./Path.js":25}],20:[function(require,module,exports){
+},{"./Entity.js":21,"./Maze.js":25,"./Path.js":26}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17939,7 +17990,7 @@ var Entity = function () {
 
 exports.default = Entity;
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17956,6 +18007,10 @@ var _Input = require('./Input.js');
 
 var _Input2 = _interopRequireDefault(_Input);
 
+var _Background = require('./Background.js');
+
+var _Background2 = _interopRequireDefault(_Background);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -17968,8 +18023,8 @@ var Game = function () {
     this.h = h;
 
     this.input = new _Input2.default();
-
     this.director = new _Director2.default(w, h, 5);
+    this.background = new _Background2.default(w, h);
   }
 
   _createClass(Game, [{
@@ -17980,7 +18035,11 @@ var Game = function () {
     }
   }, {
     key: 'draw',
-    value: function draw(ctx) {
+    value: function draw(ctx, bgCtx) {
+      // draw background
+      this.background.draw(bgCtx);
+
+      // draw game
       ctx.clearRect(0, 0, this.w, this.h);
 
       ctx.save();
@@ -18000,7 +18059,7 @@ var Game = function () {
 
 exports.default = Game;
 
-},{"./Director.js":19,"./Input.js":23}],22:[function(require,module,exports){
+},{"./Background.js":18,"./Director.js":20,"./Input.js":24}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18070,7 +18129,7 @@ var Grid = function () {
 
 exports.default = Grid;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18155,7 +18214,7 @@ var Input = function () {
 
 exports.default = Input;
 
-},{"lodash":16}],24:[function(require,module,exports){
+},{"lodash":16}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18359,7 +18418,7 @@ var Maze = function (_Entity) {
 exports.default = Maze;
 exports.events = events;
 
-},{"./Cell.js":18,"./Entity.js":20,"./Grid.js":22,"./Path.js":25,"./Player.js":26,"./dirs.js":27,"event-emitter":15,"lodash":16,"tween.js":17}],25:[function(require,module,exports){
+},{"./Cell.js":19,"./Entity.js":21,"./Grid.js":23,"./Path.js":26,"./Player.js":27,"./dirs.js":28,"event-emitter":15,"lodash":16,"tween.js":17}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18480,7 +18539,7 @@ var Path = function () {
 
 exports.default = Path;
 
-},{"./Grid.js":22,"./dirs.js":27,"lodash":16}],26:[function(require,module,exports){
+},{"./Grid.js":23,"./dirs.js":28,"lodash":16}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18548,7 +18607,7 @@ var Player = function (_Entity) {
 
 exports.default = Player;
 
-},{"./Entity.js":20}],27:[function(require,module,exports){
+},{"./Entity.js":21}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18580,7 +18639,7 @@ exports.dirs = dirs;
 exports.oppDirs = oppDirs;
 exports.delta = delta;
 
-},{"lodash":16}],28:[function(require,module,exports){
+},{"lodash":16}],29:[function(require,module,exports){
 'use strict';
 
 var _game = require('./game.js');
@@ -18613,4 +18672,4 @@ function gameloop(timestamp) {
 
 requestAnimationFrame(gameloop);
 
-},{"./game.js":21}]},{},[28]);
+},{"./game.js":22}]},{},[29]);

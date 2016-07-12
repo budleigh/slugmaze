@@ -1,5 +1,6 @@
 import Director from './Director.js';
 import Input from './Input.js';
+import Background from './Background.js';
 
 class Game {
   constructor(w, h) {
@@ -7,8 +8,8 @@ class Game {
     this.h = h;
 
     this.input = new Input();
-
     this.director = new Director(w, h, 5);
+    this.background = new Background(w, h);
   }
 
   update(dt) {
@@ -16,7 +17,11 @@ class Game {
     this.director.update(dt, this.input.getPressedKeys());
   }
 
-  draw(ctx) {
+  draw(ctx, bgCtx) {
+    // draw background
+    this.background.draw(bgCtx);
+
+    // draw game
     ctx.clearRect(0, 0, this.w, this.h);
 
     ctx.save();
