@@ -15,11 +15,15 @@ class Background extends Entity {
     // false if the SE lines are moving
     this.translatingNE = false;
 
-    this.lineSpeed = -25;
+    this.lineSpeed = 50;
   }
 
   setLineSpeed(speed) {
     this.lineSpeed = speed;
+  }
+
+  bumpLineSpeed(ds) {
+    this.lineSpeed += ds;
   }
 
   changeCurrent() {
@@ -35,6 +39,7 @@ class Background extends Entity {
   getAPI() {
     return {
       setLineSpeed: this.setLineSpeed.bind(this),
+      bumpLineSpeed: this.bumpLineSpeed.bind(this),
       changeCurrent: this.changeCurrent.bind(this),
     };
   }

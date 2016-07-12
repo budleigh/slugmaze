@@ -100,7 +100,10 @@ class Maze extends Entity {
   }
 
   // `color` is read as a property from `borderRGBAs`
-  flashBorderColor(duration, color, onComplete = noop) {
+  flashBorderColor(duration, color, onComplete = noop, overrideIntervalCheck) {
+    // don't flash if we're already permanently flashing
+    if (this.flashingBorderColorOnInterval && !overrideIntervalCheck) return;
+
     // tween in for 1/4 `duration`
     return this.tweenBorderRGBA(duration / 4, borderRGBAs[color]()).onComplete(() => {
       // delay for 1/2 `duration`
@@ -109,6 +112,14 @@ class Maze extends Entity {
         this.tweenBorderRGBA(duration / 4, borderRGBAs.neutral()).onComplete(onComplete);
       }, duration / 2);
     });
+  }
+
+  flashBorderColorOnInterval(duration, color) {
+    this.flashBorderColor(duration, color, noop, true);
+
+    this.flashingBorderColorOnInterval = setInterval(() => {
+      this.flashBorderColor(duration, color, noop, true);
+    }, duration * 1.1);
   }
 
   createCells(cellWidth, cellHeight, cellsPerSide) {

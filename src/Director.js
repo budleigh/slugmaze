@@ -74,6 +74,8 @@ class Director extends Entity {
   }
 
   newRound() {
+    this.backgroundAPI.bumpLineSpeed(-2);
+
     this.maze.setPlayerMobility(false);
     this.clearPathAtPlayer();
 
@@ -103,23 +105,31 @@ class Director extends Entity {
   }
 
   onDie() {
-    this.maze.flashBorderColor(borderColorFlashDuration, 'red');
-    this.killPlayer();
-    this.newRound();
+    if (this.lives === 0) {
+      this.onGameOver();
+    } else {
+      this.killPlayer();
+      this.newRound();
 
-    this.backgroundAPI.changeCurrent();
-
-    if (this.lives === 0) this.onNoLivesRemaining();
+      if (this.lives > 0) {
+        this.maze.flashBorderColor(borderColorFlashDuration, 'red');
+      } else if (this.lives === 0) {
+        this.onNoLivesRemaining();
+      }
+    }
   }
 
   onNoLivesRemaining() {
     // flash red border forever
-    setInterval(() => {
-      this.maze.flashBorderColor(borderColorFlashDuration, 'red');
-    }, borderColorFlashDuration * 1.2);
+    this.maze.flashBorderColorOnInterval(borderColorFlashDuration, 'red');
 
     // significantly speed up background
     this.backgroundAPI.setLineSpeed(100);
+  }
+
+  onGameOver() {
+    this.backgroundAPI.setLineSpeed(0);
+    this.maze.flashBorderColorOnInterval(3000/60, 'red');
   }
 
   killPlayer() {

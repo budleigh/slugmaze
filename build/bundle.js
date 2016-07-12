@@ -17674,7 +17674,7 @@ var Background = function (_Entity) {
     // false if the SE lines are moving
     _this.translatingNE = false;
 
-    _this.lineSpeed = -25;
+    _this.lineSpeed = 50;
     return _this;
   }
 
@@ -17682,6 +17682,11 @@ var Background = function (_Entity) {
     key: 'setLineSpeed',
     value: function setLineSpeed(speed) {
       this.lineSpeed = speed;
+    }
+  }, {
+    key: 'bumpLineSpeed',
+    value: function bumpLineSpeed(ds) {
+      this.lineSpeed += ds;
     }
   }, {
     key: 'changeCurrent',
@@ -17699,6 +17704,7 @@ var Background = function (_Entity) {
     value: function getAPI() {
       return {
         setLineSpeed: this.setLineSpeed.bind(this),
+        bumpLineSpeed: this.bumpLineSpeed.bind(this),
         changeCurrent: this.changeCurrent.bind(this)
       };
     }
@@ -18024,6 +18030,8 @@ var Director = function (_Entity) {
     value: function newRound() {
       var _this3 = this;
 
+      this.backgroundAPI.bumpLineSpeed(-2);
+
       this.maze.setPlayerMobility(false);
       this.clearPathAtPlayer();
 
@@ -18052,26 +18060,33 @@ var Director = function (_Entity) {
   }, {
     key: 'onDie',
     value: function onDie() {
-      this.maze.flashBorderColor(borderColorFlashDuration, 'red');
-      this.killPlayer();
-      this.newRound();
+      if (this.lives === 0) {
+        this.onGameOver();
+      } else {
+        this.killPlayer();
+        this.newRound();
 
-      this.backgroundAPI.changeCurrent();
-
-      if (this.lives === 0) this.onNoLivesRemaining();
+        if (this.lives > 0) {
+          this.maze.flashBorderColor(borderColorFlashDuration, 'red');
+        } else if (this.lives === 0) {
+          this.onNoLivesRemaining();
+        }
+      }
     }
   }, {
     key: 'onNoLivesRemaining',
     value: function onNoLivesRemaining() {
-      var _this5 = this;
-
       // flash red border forever
-      setInterval(function () {
-        _this5.maze.flashBorderColor(borderColorFlashDuration, 'red');
-      }, borderColorFlashDuration * 1.2);
+      this.maze.flashBorderColorOnInterval(borderColorFlashDuration, 'red');
 
       // significantly speed up background
       this.backgroundAPI.setLineSpeed(100);
+    }
+  }, {
+    key: 'onGameOver',
+    value: function onGameOver() {
+      this.backgroundAPI.setLineSpeed(0);
+      this.maze.flashBorderColorOnInterval(3000 / 60, 'red');
     }
   }, {
     key: 'killPlayer',
@@ -18082,7 +18097,7 @@ var Director = function (_Entity) {
   }, {
     key: 'showPaths',
     value: function showPaths() {
-      var _this6 = this;
+      var _this5 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18091,15 +18106,15 @@ var Director = function (_Entity) {
       var fadeOutDuration = 700;
 
       setTimeout(function () {
-        _this6.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
-          _this6.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
+        _this5.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
+          _this5.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
         });
       }, delay);
     }
   }, {
     key: 'rotateMaze',
     value: function rotateMaze() {
-      var _this7 = this;
+      var _this6 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18108,8 +18123,8 @@ var Director = function (_Entity) {
       var duration = Math.abs(600 * turns);
 
       setTimeout(function () {
-        _this7.maze.tweenRotation(duration, turns).onComplete(function () {
-          _this7.maze.applyInputRotation(turns);
+        _this6.maze.tweenRotation(duration, turns).onComplete(function () {
+          _this6.maze.applyInputRotation(turns);
           onComplete();
         });
       }, delay);
@@ -18117,7 +18132,7 @@ var Director = function (_Entity) {
   }, {
     key: 'reflectMaze',
     value: function reflectMaze() {
-      var _this8 = this;
+      var _this7 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18126,8 +18141,8 @@ var Director = function (_Entity) {
       var duration = 600;
 
       setTimeout(function () {
-        _this8.maze.tweenReflection(duration, xAxis).onComplete(function () {
-          _this8.maze.applyInputReflection(xAxis);
+        _this7.maze.tweenReflection(duration, xAxis).onComplete(function () {
+          _this7.maze.applyInputReflection(xAxis);
           onComplete();
         });
       }, delay);
@@ -18742,6 +18757,10 @@ var Maze = function (_Entity) {
       var _this2 = this;
 
       var onComplete = arguments.length <= 2 || arguments[2] === undefined ? _lodash.noop : arguments[2];
+      var overrideIntervalCheck = arguments[3];
+
+      // don't flash if we're already permanently flashing
+      if (this.flashingBorderColorOnInterval && !overrideIntervalCheck) return;
 
       // tween in for 1/4 `duration`
       return this.tweenBorderRGBA(duration / 4, borderRGBAs[color]()).onComplete(function () {
@@ -18751,6 +18770,17 @@ var Maze = function (_Entity) {
           _this2.tweenBorderRGBA(duration / 4, borderRGBAs.neutral()).onComplete(onComplete);
         }, duration / 2);
       });
+    }
+  }, {
+    key: 'flashBorderColorOnInterval',
+    value: function flashBorderColorOnInterval(duration, color) {
+      var _this3 = this;
+
+      this.flashBorderColor(duration, color, _lodash.noop, true);
+
+      this.flashingBorderColorOnInterval = setInterval(function () {
+        _this3.flashBorderColor(duration, color, _lodash.noop, true);
+      }, duration * 1.1);
     }
   }, {
     key: 'createCells',
@@ -18793,10 +18823,10 @@ var Maze = function (_Entity) {
   }, {
     key: 'openPath',
     value: function openPath(startX, startY, path) {
-      var _this3 = this;
+      var _this4 = this;
 
       _Path2.default.each(startX, startY, path, function (x, y, idx) {
-        var cell = _this3.cells.read(x, y);
+        var cell = _this4.cells.read(x, y);
 
         // in (almost) every cell, we need to open the path we leave from
         // and the path we came from
@@ -18890,13 +18920,13 @@ var Maze = function (_Entity) {
   }, {
     key: 'draw',
     value: function draw(ctx) {
-      var _this4 = this;
+      var _this5 = this;
 
       ctx.save();
       this.applyGraphicalTransforms(ctx);
 
       this.cells.each(function (cell) {
-        return cell.draw(ctx, _this4.transforms.cellAlpha);
+        return cell.draw(ctx, _this5.transforms.cellAlpha);
       });
       this.drawBorder(ctx);
       this.player.draw(ctx, this.playerCanMove);
