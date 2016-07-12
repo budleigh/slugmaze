@@ -5,6 +5,8 @@ import Path from './Path.js';
 import Maze, { events } from './Maze.js';
 import HUD from './HUD.js';
 
+const borderColorFlashDuration = 1000;
+
 class Director extends Entity {
   constructor(w, h, cellsPerSide) {
     super(0, 0, w, h);
@@ -42,7 +44,7 @@ class Director extends Entity {
   }
 
   onGoal() {
-    this.maze.flashBorderColor(1500, 'green', () => console.log('we did it'));
+    this.maze.flashBorderColor(borderColorFlashDuration, 'green');
 
     this.round += 1;
     this.HUD.setRound(this.round);
@@ -61,8 +63,12 @@ class Director extends Entity {
     });
   }
 
+  chainTransforms(transforms, onComplete) {
+
+  }
+
   onDie() {
-    this.maze.flashBorderColor(1500, 'red', () => console.log('we did it'));
+    this.maze.flashBorderColor(borderColorFlashDuration, 'red');
     this.killPlayer();
     this.newRound();
   }

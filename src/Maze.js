@@ -1,5 +1,5 @@
 import ee from 'event-emitter';
-import { isEqual, mapValues } from 'lodash';
+import { isEqual, mapValues, noop } from 'lodash';
 import TWEEN from 'tween.js';
 
 import Entity from './Entity.js';
@@ -100,9 +100,14 @@ class Maze extends Entity {
   }
 
   // `color` is read as a property from `borderRGBAs`
-  flashBorderColor(duration, color, onComplete) {
-    return this.tweenBorderRGBA(duration / 6, borderRGBAs[color]()).onComplete(() => {
-      this.tweenBorderRGBA(duration / 6 * 5, borderRGBAs.neutral()).onComplete(onComplete);
+  flashBorderColor(duration, color, onComplete = noop) {
+    // tween in for 1/4 `duration`
+    return this.tweenBorderRGBA(duration / 4, borderRGBAs[color]()).onComplete(() => {
+      // delay for 1/2 `duration`
+      setTimeout(() => {
+        // tween out for 1/4 `duration`
+        this.tweenBorderRGBA(duration / 4, borderRGBAs.neutral()).onComplete(onComplete);
+      }, duration / 2);
     });
   }
 

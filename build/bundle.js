@@ -17898,6 +17898,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var borderColorFlashDuration = 1000;
+
 var Director = function (_Entity) {
   _inherits(Director, _Entity);
 
@@ -17948,9 +17950,7 @@ var Director = function (_Entity) {
   }, {
     key: 'onGoal',
     value: function onGoal() {
-      this.maze.flashBorderColor(1500, 'green', function () {
-        return console.log('we did it');
-      });
+      this.maze.flashBorderColor(borderColorFlashDuration, 'green');
 
       this.round += 1;
       this.HUD.setRound(this.round);
@@ -17972,11 +17972,12 @@ var Director = function (_Entity) {
       });
     }
   }, {
+    key: 'chainTransforms',
+    value: function chainTransforms(transforms, onComplete) {}
+  }, {
     key: 'onDie',
     value: function onDie() {
-      this.maze.flashBorderColor(1500, 'red', function () {
-        return console.log('we did it');
-      });
+      this.maze.flashBorderColor(borderColorFlashDuration, 'red');
       this.killPlayer();
       this.newRound();
     }
@@ -18643,11 +18644,18 @@ var Maze = function (_Entity) {
 
   }, {
     key: 'flashBorderColor',
-    value: function flashBorderColor(duration, color, onComplete) {
+    value: function flashBorderColor(duration, color) {
       var _this2 = this;
 
-      return this.tweenBorderRGBA(duration / 6, borderRGBAs[color]()).onComplete(function () {
-        _this2.tweenBorderRGBA(duration / 6 * 5, borderRGBAs.neutral()).onComplete(onComplete);
+      var onComplete = arguments.length <= 2 || arguments[2] === undefined ? _lodash.noop : arguments[2];
+
+      // tween in for 1/4 `duration`
+      return this.tweenBorderRGBA(duration / 4, borderRGBAs[color]()).onComplete(function () {
+        // delay for 1/2 `duration`
+        setTimeout(function () {
+          // tween out for 1/4 `duration`
+          _this2.tweenBorderRGBA(duration / 4, borderRGBAs.neutral()).onComplete(onComplete);
+        }, duration / 2);
       });
     }
   }, {
