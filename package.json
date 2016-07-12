@@ -2,7 +2,7 @@
   "name": "slugmaze",
   "version": "0.0.0",
   "description": "a slug in a maze",
-  "main": "index.js",
+  "main": "server.js",
   "engines": {
     "node": "6.2.1"
   },
