@@ -16,6 +16,8 @@ class Director extends Entity {
     this.maze = this.createMaze(w, h, cellsPerSide);
     this.newRound();
 
+    this.HUD = this.createHUD(w, h);
+
     this.maze.emitter.on(events.GOAL, () => this.newRound());
     this.maze.emitter.on(events.DIE, () => this.killPlayer());
   }
@@ -23,11 +25,20 @@ class Director extends Entity {
   createMaze(w, h, cellsPerSide) {
     const mazeSideLength = Math.min(w, h) * .66;
     const mazeX = (w - mazeSideLength) / 2;
-    const mazeY = (h - mazeSideLength) / 2;
+    const mazeY = (h - mazeSideLength) / 2 * 1.15;
 
     const cellSideLength = mazeSideLength / cellsPerSide;
 
     return new Maze(mazeX, mazeY, cellSideLength, cellSideLength, cellsPerSide);
+  }
+
+  createHUD(w, h) {
+    const hudWidth = w * .47;
+    const hudHeight = h * .08;
+    const hudX = (w - hudWidth) / 2;
+    const hudY = h * .05;
+
+    return new HUD(hudX, hudY, hudWidth, hudHeight);
   }
 
   newRound() {
@@ -38,7 +49,7 @@ class Director extends Entity {
     this.maze.setPlayerMobility(false);
 
     this.showPaths(250, () => {
-      this.reflectMaze(100, () => {
+      this.rotateMaze(100, () => {
         this.maze.setPlayerMobility(true)
       });
     });
@@ -58,7 +69,7 @@ class Director extends Entity {
       this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(() => {
         this.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
       });
-    }, delay)
+    }, delay);
   }
 
   rotateMaze(delay = 0, onComplete) {
@@ -114,7 +125,10 @@ class Director extends Entity {
   }
 
   draw(ctx) {
+    ctx.save();
+
     this.maze.draw(ctx);
+    this.HUD.draw(ctx);
   }
 }
 

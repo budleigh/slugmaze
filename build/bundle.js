@@ -17913,6 +17913,8 @@ var Director = function (_Entity) {
     _this.maze = _this.createMaze(w, h, cellsPerSide);
     _this.newRound();
 
+    _this.HUD = _this.createHUD(w, h);
+
     _this.maze.emitter.on(_Maze.events.GOAL, function () {
       return _this.newRound();
     });
@@ -17927,11 +17929,21 @@ var Director = function (_Entity) {
     value: function createMaze(w, h, cellsPerSide) {
       var mazeSideLength = Math.min(w, h) * .66;
       var mazeX = (w - mazeSideLength) / 2;
-      var mazeY = (h - mazeSideLength) / 2;
+      var mazeY = (h - mazeSideLength) / 2 * 1.15;
 
       var cellSideLength = mazeSideLength / cellsPerSide;
 
       return new _Maze2.default(mazeX, mazeY, cellSideLength, cellSideLength, cellsPerSide);
+    }
+  }, {
+    key: 'createHUD',
+    value: function createHUD(w, h) {
+      var hudWidth = w * .47;
+      var hudHeight = h * .08;
+      var hudX = (w - hudWidth) / 2;
+      var hudY = h * .05;
+
+      return new _HUD2.default(hudX, hudY, hudWidth, hudHeight);
     }
   }, {
     key: 'newRound',
@@ -17945,7 +17957,7 @@ var Director = function (_Entity) {
       this.maze.setPlayerMobility(false);
 
       this.showPaths(250, function () {
-        _this2.reflectMaze(100, function () {
+        _this2.rotateMaze(100, function () {
           _this2.maze.setPlayerMobility(true);
         });
       });
@@ -18041,7 +18053,10 @@ var Director = function (_Entity) {
   }, {
     key: 'draw',
     value: function draw(ctx) {
+      ctx.save();
+
       this.maze.draw(ctx);
+      this.HUD.draw(ctx);
     }
   }]);
 
@@ -18247,6 +18262,10 @@ exports.default = Grid;
 },{}],24:[function(require,module,exports){
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Entity2 = require('./Entity.js');
@@ -18286,6 +18305,8 @@ var HUD = function (_Entity) {
 
   return HUD;
 }(_Entity3.default);
+
+exports.default = HUD;
 
 },{"./Entity.js":21}],25:[function(require,module,exports){
 'use strict';

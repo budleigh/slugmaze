@@ -16,3 +16,5 @@ class HUD extends Entity {
     ctx.restore();
   }
 }
+
+export default HUD;
