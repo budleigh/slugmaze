@@ -5,8 +5,13 @@ class Grid {
     this.data = new Array(w * h);
   }
 
+  isValidIdx(x, y) {
+    // block invalid read/writes that are off the grid
+    return 0 <= x && x < this.w && 0 <= y && y < this.h;
+  }
+
   coordIdx(x, y) {
-    return x * this.h + y;
+    return this.isValidIdx(x, y) ? x * this.h + y : -1;
   }
 
   read(x, y) {
@@ -14,7 +19,11 @@ class Grid {
   }
 
   write(x, y, val) {
-    this.data[this.coordIdx(x, y)] = val;
+    const idx = this.coordIdx(x, y);
+
+    if (idx !== -1) {
+      this.data[this.coordIdx(x, y)] = val;
+    }
   }
 
   each(iterator) {

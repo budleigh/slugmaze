@@ -2,6 +2,7 @@ import Entity from './Entity.js';
 import Cell from './Cell.js';
 import Player from './Player.js';
 import Grid from './Grid.js';
+import Path from './Path.js';
 import { delta } from './dirs.js';
 
 class Maze extends Entity {

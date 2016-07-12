@@ -16524,7 +16524,7 @@ var Cell = function (_Entity) {
 
 exports.default = Cell;
 
-},{"./Entity.js":3,"./dirs.js":9,"lodash":1}],3:[function(require,module,exports){
+},{"./Entity.js":3,"./dirs.js":10,"lodash":1}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16657,9 +16657,15 @@ var Grid = function () {
   }
 
   _createClass(Grid, [{
+    key: "isValidIdx",
+    value: function isValidIdx(x, y) {
+      // block invalid read/writes that are off the grid
+      return 0 <= x && x < this.w && 0 <= y && y < this.h;
+    }
+  }, {
     key: "coordIdx",
     value: function coordIdx(x, y) {
-      return x * this.h + y;
+      return this.isValidIdx(x, y) ? x * this.h + y : -1;
     }
   }, {
     key: "read",
@@ -16669,7 +16675,11 @@ var Grid = function () {
   }, {
     key: "write",
     value: function write(x, y, val) {
-      this.data[this.coordIdx(x, y)] = val;
+      var idx = this.coordIdx(x, y);
+
+      if (idx !== -1) {
+        this.data[this.coordIdx(x, y)] = val;
+      }
     }
   }, {
     key: "each",
@@ -16806,6 +16816,10 @@ var _Grid = require('./Grid.js');
 
 var _Grid2 = _interopRequireDefault(_Grid);
 
+var _Path = require('./Path.js');
+
+var _Path2 = _interopRequireDefault(_Path);
+
 var _dirs = require('./dirs.js');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -16902,7 +16916,96 @@ var Maze = function (_Entity) {
 
 exports.default = Maze;
 
-},{"./Cell.js":2,"./Entity.js":3,"./Grid.js":5,"./Player.js":8,"./dirs.js":9}],8:[function(require,module,exports){
+},{"./Cell.js":2,"./Entity.js":3,"./Grid.js":5,"./Path.js":8,"./Player.js":9,"./dirs.js":10}],8:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _lodash = require('lodash');
+
+var _dirs = require('./dirs.js');
+
+var _Grid = require('./Grid.js');
+
+var _Grid2 = _interopRequireDefault(_Grid);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Path = function () {
+  function Path() {
+    _classCallCheck(this, Path);
+  }
+
+  _createClass(Path, null, [{
+    key: 'random',
+
+    // generates a random path of a given length with given start coordinates and
+    // given grid boundaries (the mins are implicitly 0).
+    value: function random(startX, startY, maxX, maxY, length) {
+      // grid.read(x, y) is true if that cell is unvisited by our path
+      var grid = new _Grid2.default(maxX, maxY);
+      var tries = 0;
+      var validDirs = void 0;
+      var bestPath = '';
+      var nextPath = void 0;
+      var nextDir = void 0;
+      var x = void 0;
+      var y = void 0;
+
+      while (tries < 10) {
+        grid.writeEach(function () {
+          return true;
+        });
+        nextPath = '';
+        x = startX;
+        y = startY;
+
+        while (nextPath.length < length) {
+          // mark the current cell as visited
+          grid.write(x, y, false);
+
+          // enumerate the valid directions from our current location
+          validDirs = (0, _lodash.filter)(_dirs.dirs, function (dir) {
+            return grid.read(x + _dirs.delta[dir].x, y + _dirs.delta[dir].y);
+          });
+
+          console.log({ x: x, y: y, validDirs: validDirs });
+
+          if (validDirs.length) {
+            // choose a valid direction, add it to our path, and keep going
+            nextDir = (0, _lodash.sample)(validDirs);
+            nextPath += nextDir;
+            x += _dirs.delta[nextDir].x;
+            y += _dirs.delta[nextDir].y;
+          } else {
+            // we're stuck! check if our path is an improvement
+            bestPath = bestPath.length >= nextPath.length ? bestPath : nextPath;
+            // and try again
+            break;
+          }
+        }
+
+        if (nextPath.length === length) return nextPath;
+
+        tries++;
+      }
+    }
+  }]);
+
+  return Path;
+}();
+
+console.log(Path.random(0, 0, 6, 6, 12));
+
+exports.default = Path;
+
+},{"./Grid.js":5,"./dirs.js":10,"lodash":1}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16962,7 +17065,7 @@ var Player = function (_Entity) {
 
 exports.default = Player;
 
-},{"./Entity.js":3}],9:[function(require,module,exports){
+},{"./Entity.js":3}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16986,7 +17089,7 @@ var delta = {
 exports.dirs = dirs;
 exports.delta = delta;
 
-},{"lodash":1}],10:[function(require,module,exports){
+},{"lodash":1}],11:[function(require,module,exports){
 'use strict';
 
 var _game = require('./game.js');
@@ -17017,4 +17120,4 @@ function gameloop(timestamp) {
 
 requestAnimationFrame(gameloop);
 
-},{"./game.js":4}]},{},[10]);
+},{"./game.js":4}]},{},[11]);
