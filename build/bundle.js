@@ -17469,7 +17469,7 @@ var Path = function () {
           } else {
             // we're stuck! check if our path is an improvement
             bestPath = bestPath.length >= nextPath.length ? bestPath : nextPath;
-            // and try again
+            // and try again with a new path
             break;
           }
         }
@@ -17479,6 +17479,10 @@ var Path = function () {
         tries++;
       }
     }
+
+    // iterates over the path given start coordinates, passing in the
+    // current cell coordinate and cell index to the given iterator
+
   }, {
     key: 'each',
     value: function each(startX, startY, path, iterator) {
@@ -17495,6 +17499,10 @@ var Path = function () {
       // so we need to hit it manually at the end
       iterator(x, y, path.length);
     }
+
+    // computes the change in grid coordinates from the start
+    // to the end of the given path
+
   }, {
     key: 'delta',
     value: function delta(path) {

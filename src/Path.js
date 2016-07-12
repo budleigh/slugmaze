@@ -42,7 +42,7 @@ class Path {
         } else {
           // we're stuck! check if our path is an improvement
           bestPath = bestPath.length >= nextPath.length ? bestPath : nextPath;
-          // and try again
+          // and try again with a new path
           break;
         }
       }
@@ -53,6 +53,8 @@ class Path {
     }
   }
 
+  // iterates over the path given start coordinates, passing in the
+  // current cell coordinate and cell index to the given iterator
   static each(startX, startY, path, iterator) {
     let x = startX;
     let y = startY;
@@ -68,6 +70,8 @@ class Path {
     iterator(x, y, path.length);
   }
 
+  // computes the change in grid coordinates from the start
+  // to the end of the given path
   static delta(path) {
     let result;
 
