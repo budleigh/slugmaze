@@ -17771,6 +17771,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _Entity2 = require('./Entity.js');
+
+var _Entity3 = _interopRequireDefault(_Entity2);
+
 var _Path = require('./Path.js');
 
 var _Path2 = _interopRequireDefault(_Path);
@@ -17783,22 +17787,41 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Director = function () {
-  function Director() {
-    var _this = this;
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Director = function (_Entity) {
+  _inherits(Director, _Entity);
+
+  function Director(w, h, cellsPerSide) {
     _classCallCheck(this, Director);
 
-    this.cellsPerSide = 6;
-    this.maze = new _Maze2.default(50, 50, 90, 90, this.cellsPerSide);
-    this.newRound();
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Director).call(this, 0, 0, w, h));
 
-    this.maze.emitter.on(_Maze.events.GOAL, function () {
+    _this.cellsPerSide = cellsPerSide;
+
+    _this.maze = _this.createMaze(w, h, cellsPerSide);
+    _this.newRound();
+
+    _this.maze.emitter.on(_Maze.events.GOAL, function () {
       return _this.newRound();
     });
+    return _this;
   }
 
   _createClass(Director, [{
+    key: 'createMaze',
+    value: function createMaze(w, h, cellsPerSide) {
+      var mazeSideLength = Math.min(w, h) * 1 / 2;
+      var mazeX = (w - mazeSideLength) / 2;
+      var mazeY = (h - mazeSideLength) / 2;
+
+      var cellSideLength = mazeSideLength / cellsPerSide;
+
+      return new _Maze2.default(mazeX, mazeY, cellSideLength, cellSideLength, cellsPerSide);
+    }
+  }, {
     key: 'newRound',
     value: function newRound() {
       this.clearPathAtPlayer();
@@ -17852,11 +17875,11 @@ var Director = function () {
   }]);
 
   return Director;
-}();
+}(_Entity3.default);
 
 exports.default = Director;
 
-},{"./Maze.js":24,"./Path.js":25}],20:[function(require,module,exports){
+},{"./Entity.js":20,"./Maze.js":24,"./Path.js":25}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17946,7 +17969,7 @@ var Game = function () {
 
     this.input = new _Input2.default();
 
-    this.director = new _Director2.default();
+    this.director = new _Director2.default(w, h, 5);
   }
 
   _createClass(Game, [{
@@ -17959,7 +17982,16 @@ var Game = function () {
     key: 'draw',
     value: function draw(ctx) {
       ctx.clearRect(0, 0, this.w, this.h);
+
+      ctx.save();
+      ctx.strokeStyle = 'blue';
+      ctx.lineWidth = 3;
+
       this.director.draw(ctx);
+
+      ctx.strokeRect(0, 0, this.w, this.h);
+
+      ctx.restore();
     }
   }]);
 
@@ -18558,9 +18590,11 @@ var _game2 = _interopRequireDefault(_game);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var canvas = document.getElementById('canvas');
-var width = canvas.width;
-var height = canvas.height;
+var bg = document.getElementById('bg');
+var width = canvas.width = bg.width = 600;
+var height = canvas.height = bg.height = 600;
 var ctx = canvas.getContext('2d');
+var bgCtx = bg.getContext('2d');
 
 var game = new _game2.default(width, height);
 
@@ -18572,7 +18606,7 @@ function gameloop(timestamp) {
   nextTimestamp = timestamp;
 
   game.update((nextTimestamp - lastTimestamp) / 1000);
-  game.draw(ctx);
+  game.draw(ctx, bgCtx);
 
   requestAnimationFrame(gameloop);
 }
