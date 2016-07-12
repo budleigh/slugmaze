@@ -17679,7 +17679,7 @@ var Background = function (_Entity) {
       var translation = this.transform.translationNE;
       var x = 0;
 
-      while (x < this.w * 2) {
+      while (x < this.w * 3) {
         ctx.beginPath();
         ctx.moveTo(x - translation, 0);
         ctx.lineTo(0, x - translation);

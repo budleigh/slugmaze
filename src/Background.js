@@ -17,7 +17,7 @@ class Background extends Entity {
     const translation = this.transform.translationNE;
     let x = 0;
 
-    while (x < this.w * 2) {
+    while (x < this.w * 3) {
       ctx.beginPath();
       ctx.moveTo(x - translation, 0);
       ctx.lineTo(0, x - translation);
