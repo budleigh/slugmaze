@@ -1,4 +1,4 @@
-import { sample } from 'lodash';
+import { sample, reduceRight } from 'lodash';
 
 import Entity from './Entity.js';
 import Path from './Path.js';
@@ -56,15 +56,25 @@ class Director extends Entity {
     this.maze.setPlayerMobility(false);
     this.clearPathAtPlayer();
 
-    this.showPaths(250, () => {
-      this.rotateMaze(100, () => {
-        this.maze.setPlayerMobility(true);
-      });
-    });
+    this.chainTransforms([
+        {
+          method: this.showPaths,
+          args: [250],
+        },
+        {
+          method: this.rotateMaze,
+          args: [100],
+        }
+      ],
+      () => this.maze.setPlayerMobility(true)
+    );
   }
 
-  chainTransforms(transforms, onComplete) {
-
+  // hehe
+  chainTransforms(transformData, onComplete) {
+    return reduceRight(transformData, (chain, { method, args }) => {
+      return method.bind(this, ...args, chain);
+    }, onComplete)();
   }
 
   onDie() {

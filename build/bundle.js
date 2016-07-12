@@ -17892,6 +17892,8 @@ var _HUD2 = _interopRequireDefault(_HUD);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -17965,15 +17967,31 @@ var Director = function (_Entity) {
       this.maze.setPlayerMobility(false);
       this.clearPathAtPlayer();
 
-      this.showPaths(250, function () {
-        _this2.rotateMaze(100, function () {
-          _this2.maze.setPlayerMobility(true);
-        });
+      this.chainTransforms([{
+        method: this.showPaths,
+        args: [250]
+      }, {
+        method: this.rotateMaze,
+        args: [100]
+      }], function () {
+        return _this2.maze.setPlayerMobility(true);
       });
     }
+
+    // hehe
+
   }, {
     key: 'chainTransforms',
-    value: function chainTransforms(transforms, onComplete) {}
+    value: function chainTransforms(transformData, onComplete) {
+      var _this3 = this;
+
+      return (0, _lodash.reduceRight)(transformData, function (chain, _ref) {
+        var method = _ref.method;
+        var args = _ref.args;
+
+        return method.bind.apply(method, [_this3].concat(_toConsumableArray(args), [chain]));
+      }, onComplete)();
+    }
   }, {
     key: 'onDie',
     value: function onDie() {
@@ -17990,7 +18008,7 @@ var Director = function (_Entity) {
   }, {
     key: 'showPaths',
     value: function showPaths() {
-      var _this3 = this;
+      var _this4 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -17999,15 +18017,15 @@ var Director = function (_Entity) {
       var fadeOutDuration = 700;
 
       setTimeout(function () {
-        _this3.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
-          _this3.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
+        _this4.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
+          _this4.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
         });
       }, delay);
     }
   }, {
     key: 'rotateMaze',
     value: function rotateMaze() {
-      var _this4 = this;
+      var _this5 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18016,8 +18034,8 @@ var Director = function (_Entity) {
       var duration = Math.abs(600 * turns);
 
       setTimeout(function () {
-        _this4.maze.tweenRotation(duration, turns).onComplete(function () {
-          _this4.maze.applyInputRotation(turns);
+        _this5.maze.tweenRotation(duration, turns).onComplete(function () {
+          _this5.maze.applyInputRotation(turns);
           onComplete();
         });
       }, delay);
@@ -18025,7 +18043,7 @@ var Director = function (_Entity) {
   }, {
     key: 'reflectMaze',
     value: function reflectMaze() {
-      var _this5 = this;
+      var _this6 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18034,8 +18052,8 @@ var Director = function (_Entity) {
       var duration = 600;
 
       setTimeout(function () {
-        _this5.maze.tweenReflection(duration, xAxis).onComplete(function () {
-          _this5.maze.applyInputReflection(xAxis);
+        _this6.maze.tweenReflection(duration, xAxis).onComplete(function () {
+          _this6.maze.applyInputReflection(xAxis);
           onComplete();
         });
       }, delay);
