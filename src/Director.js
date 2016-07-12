@@ -17,7 +17,7 @@ class Director extends Entity {
 
     this.maze = this.createMaze(w, h, cellsPerSide);
     this.maze.emitter.on(events.GOAL, () => this.onGoal());
-    this.maze.emitter.on(events.DIE, () => this.killPlayer());
+    this.maze.emitter.on(events.DIE, () => this.onDie());
 
     this.newRound();
   }
@@ -42,14 +42,15 @@ class Director extends Entity {
   }
 
   onGoal() {
-    this.maze.flashGreenBorder(1500, () => console.log('we did it'));
+    this.maze.flashBorderColor(1500, 'green', () => console.log('we did it'));
+
+    this.round += 1;
+    this.HUD.setRound(this.round);
+
     this.newRound();
   }
 
   newRound() {
-    this.round += 1;
-    this.HUD.setRound(this.round);
-
     this.maze.setPlayerMobility(false);
     this.clearPathAtPlayer();
 
@@ -58,6 +59,12 @@ class Director extends Entity {
         this.maze.setPlayerMobility(true);
       });
     });
+  }
+
+  onDie() {
+    this.maze.flashBorderColor(1500, 'red', () => console.log('we did it'));
+    this.killPlayer();
+    this.newRound();
   }
 
   killPlayer() {

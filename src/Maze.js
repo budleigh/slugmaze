@@ -19,6 +19,7 @@ const events = {
 const borderRGBAs = {
   neutral: () => ({ r: 255, g: 255, b: 255, a: 0.6 }),
   green: () => ({ r: 0, g: 255, b: 0, a: 0.8 }),
+  red: () => ({ r: 255, g: 0, b: 0, a: 0.8 }),
 };
 
 class Maze extends Entity {
@@ -98,8 +99,9 @@ class Maze extends Entity {
       .start();
   }
 
-  flashGreenBorder(duration, onComplete) {
-    return this.tweenBorderRGBA(duration / 6, borderRGBAs.green()).onComplete(() => {
+  // `color` is read as a property from `borderRGBAs`
+  flashBorderColor(duration, color, onComplete) {
+    return this.tweenBorderRGBA(duration / 6, borderRGBAs[color]()).onComplete(() => {
       this.tweenBorderRGBA(duration / 6 * 5, borderRGBAs.neutral()).onComplete(onComplete);
     });
   }

@@ -17917,7 +17917,7 @@ var Director = function (_Entity) {
       return _this.onGoal();
     });
     _this.maze.emitter.on(_Maze.events.DIE, function () {
-      return _this.killPlayer();
+      return _this.onDie();
     });
 
     _this.newRound();
@@ -17948,18 +17948,19 @@ var Director = function (_Entity) {
   }, {
     key: 'onGoal',
     value: function onGoal() {
-      this.maze.flashGreenBorder(1500, function () {
+      this.maze.flashBorderColor(1500, 'green', function () {
         return console.log('we did it');
       });
+
+      this.round += 1;
+      this.HUD.setRound(this.round);
+
       this.newRound();
     }
   }, {
     key: 'newRound',
     value: function newRound() {
       var _this2 = this;
-
-      this.round += 1;
-      this.HUD.setRound(this.round);
 
       this.maze.setPlayerMobility(false);
       this.clearPathAtPlayer();
@@ -17969,6 +17970,15 @@ var Director = function (_Entity) {
           _this2.maze.setPlayerMobility(true);
         });
       });
+    }
+  }, {
+    key: 'onDie',
+    value: function onDie() {
+      this.maze.flashBorderColor(1500, 'red', function () {
+        return console.log('we did it');
+      });
+      this.killPlayer();
+      this.newRound();
     }
   }, {
     key: 'killPlayer',
@@ -18538,6 +18548,9 @@ var borderRGBAs = {
   },
   green: function green() {
     return { r: 0, g: 255, b: 0, a: 0.8 };
+  },
+  red: function red() {
+    return { r: 255, g: 0, b: 0, a: 0.8 };
   }
 };
 
@@ -18624,12 +18637,15 @@ var Maze = function (_Entity) {
     value: function tweenBorderRGBA(duration, target) {
       return new _tween2.default.Tween(this.transforms.borderRGBA).to(target, duration).start();
     }
+
+    // `color` is read as a property from `borderRGBAs`
+
   }, {
-    key: 'flashGreenBorder',
-    value: function flashGreenBorder(duration, onComplete) {
+    key: 'flashBorderColor',
+    value: function flashBorderColor(duration, color, onComplete) {
       var _this2 = this;
 
-      return this.tweenBorderRGBA(duration / 6, borderRGBAs.green()).onComplete(function () {
+      return this.tweenBorderRGBA(duration / 6, borderRGBAs[color]()).onComplete(function () {
         _this2.tweenBorderRGBA(duration / 6 * 5, borderRGBAs.neutral()).onComplete(onComplete);
       });
     }
