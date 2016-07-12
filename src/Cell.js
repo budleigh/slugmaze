@@ -86,8 +86,6 @@ class Cell extends Entity {
   }
 
   draw(ctx, alpha) {
-    this.drawBackground(ctx);
-
     if (this.hasPath()) {
       this.drawCenter(ctx, alpha);
       this.drawPaths(ctx, alpha);

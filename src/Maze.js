@@ -123,16 +123,19 @@ class Maze extends Entity {
     this.handleInput(keys);
   }
 
+  drawBorder(ctx) {
+    // draw border
+    ctx.lineWidth = '4';
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+    ctx.strokeRect(0, 0, this.w, this.h);
+  }
+
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
 
     this.cells.each(cell => cell.draw(ctx, this.transforms.cellAlpha));
-
-    ctx.lineWidth = '2';
-    ctx.strokeStyle = 'red';
-    ctx.strokeRect(0, 0, this.w, this.h);
-
+    this.drawBorder(ctx);
     this.player.draw(ctx);
 
     ctx.restore();

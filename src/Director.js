@@ -15,7 +15,7 @@ class Director extends Entity {
   }
 
   createMaze(w, h, cellsPerSide) {
-    const mazeSideLength = Math.min(w, h) * 1/2;
+    const mazeSideLength = Math.min(w, h) * .66;
     const mazeX = (w - mazeSideLength) / 2;
     const mazeY = (h - mazeSideLength) / 2;
 

@@ -17799,8 +17799,6 @@ var Cell = function (_Entity) {
   }, {
     key: 'draw',
     value: function draw(ctx, alpha) {
-      this.drawBackground(ctx);
-
       if (this.hasPath()) {
         this.drawCenter(ctx, alpha);
         this.drawPaths(ctx, alpha);
@@ -17864,7 +17862,7 @@ var Director = function (_Entity) {
   _createClass(Director, [{
     key: 'createMaze',
     value: function createMaze(w, h, cellsPerSide) {
-      var mazeSideLength = Math.min(w, h) * 1 / 2;
+      var mazeSideLength = Math.min(w, h) * .66;
       var mazeX = (w - mazeSideLength) / 2;
       var mazeY = (h - mazeSideLength) / 2;
 
@@ -18040,15 +18038,10 @@ var Game = function () {
       this.background.draw(bgCtx);
 
       // draw game
-      ctx.clearRect(0, 0, this.w, this.h);
-
       ctx.save();
-      ctx.strokeStyle = 'blue';
-      ctx.lineWidth = 3;
 
+      ctx.clearRect(0, 0, this.w, this.h);
       this.director.draw(ctx);
-
-      ctx.strokeRect(0, 0, this.w, this.h);
 
       ctx.restore();
     }
@@ -18391,6 +18384,14 @@ var Maze = function (_Entity) {
       this.handleInput(keys);
     }
   }, {
+    key: 'drawBorder',
+    value: function drawBorder(ctx) {
+      // draw border
+      ctx.lineWidth = '4';
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.strokeRect(0, 0, this.w, this.h);
+    }
+  }, {
     key: 'draw',
     value: function draw(ctx) {
       var _this3 = this;
@@ -18401,11 +18402,7 @@ var Maze = function (_Entity) {
       this.cells.each(function (cell) {
         return cell.draw(ctx, _this3.transforms.cellAlpha);
       });
-
-      ctx.lineWidth = '2';
-      ctx.strokeStyle = 'red';
-      ctx.strokeRect(0, 0, this.w, this.h);
-
+      this.drawBorder(ctx);
       this.player.draw(ctx);
 
       ctx.restore();

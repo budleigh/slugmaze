@@ -22,15 +22,10 @@ class Game {
     this.background.draw(bgCtx);
 
     // draw game
-    ctx.clearRect(0, 0, this.w, this.h);
-
     ctx.save();
-    ctx.strokeStyle = 'blue';
-    ctx.lineWidth = 3;
 
+    ctx.clearRect(0, 0, this.w, this.h);
     this.director.draw(ctx);
-
-    ctx.strokeRect(0, 0, this.w, this.h);
 
     ctx.restore();
   }
