@@ -21,15 +21,12 @@ class Game {
   }
 
   draw(ctx, bgCtx) {
-    // draw background
     this.background.draw(bgCtx);
 
-    // draw game
+    // draw front layer
     ctx.save();
-
     ctx.clearRect(0, 0, this.w, this.h);
     this.director.draw(ctx);
-
     ctx.restore();
   }
 }
