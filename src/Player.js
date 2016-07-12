@@ -21,10 +21,10 @@ class Player extends Entity {
     };
   }
 
-  draw(ctx) {
+  draw(ctx, canMove) {
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = canMove ? 'green' : 'red';
 
     ctx.fillRect(0, 0, this.w, this.h);
 

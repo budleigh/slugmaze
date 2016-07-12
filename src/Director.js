@@ -26,17 +26,18 @@ class Director extends Entity {
 
   newRound() {
     this.clearPathAtPlayer();
-    this.showPaths();
+    this.maze.setPlayerMobility(false);
+    this.showPaths(() => this.maze.setPlayerMobility(true));
   }
 
-  showPaths() {
+  showPaths(callback) {
     const fadeInDuration = 600;
     const fadeOutDuration = 600;
 
-    this.maze.tweenCellAlpha(fadeInDuration, 1)
-      .onComplete(() => {
-        this.maze.tweenCellAlpha(fadeOutDuration, 0);
-      });
+    // yuck
+    this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(() => {
+      this.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(callback);
+    });
   }
 
   clearPathAtPlayer() {

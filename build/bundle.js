@@ -17873,19 +17873,25 @@ var Director = function (_Entity) {
   }, {
     key: 'newRound',
     value: function newRound() {
+      var _this2 = this;
+
       this.clearPathAtPlayer();
-      this.showPaths();
+      this.maze.setPlayerMobility(false);
+      this.showPaths(function () {
+        return _this2.maze.setPlayerMobility(true);
+      });
     }
   }, {
     key: 'showPaths',
-    value: function showPaths() {
-      var _this2 = this;
+    value: function showPaths(callback) {
+      var _this3 = this;
 
       var fadeInDuration = 600;
       var fadeOutDuration = 600;
 
+      // yuck
       this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
-        _this2.maze.tweenCellAlpha(fadeOutDuration, 0);
+        _this3.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(callback);
       });
     }
   }, {
@@ -18276,6 +18282,7 @@ var Maze = function (_Entity) {
 
     _this.cells = _this.createCells(cellWidth, cellHeight, cellsPerSide);
     _this.player = _this.createPlayer(1, 2);
+    _this.playerCanMove = false;
 
     _this.emitter = (0, _eventEmitter2.default)();
 
@@ -18310,6 +18317,11 @@ var Maze = function (_Entity) {
     key: 'createPlayer',
     value: function createPlayer(gridX, gridY) {
       return new _Player2.default(this.cells.read(gridX, gridY), gridX, gridY, 12, 12);
+    }
+  }, {
+    key: 'setPlayerMobility',
+    value: function setPlayerMobility(boolean) {
+      this.playerCanMove = boolean;
     }
   }, {
     key: 'getPlayerGridCoords',
@@ -18353,6 +18365,8 @@ var Maze = function (_Entity) {
   }, {
     key: 'handleInput',
     value: function handleInput(keys) {
+      if (!this.playerCanMove) return;
+
       // just worry about one key for now
       var dir = keys[0];
       if (!dir) return;
@@ -18403,7 +18417,7 @@ var Maze = function (_Entity) {
         return cell.draw(ctx, _this3.transforms.cellAlpha);
       });
       this.drawBorder(ctx);
-      this.player.draw(ctx);
+      this.player.draw(ctx, this.playerCanMove);
 
       ctx.restore();
     }
@@ -18588,10 +18602,10 @@ var Player = function (_Entity) {
     }
   }, {
     key: 'draw',
-    value: function draw(ctx) {
+    value: function draw(ctx, canMove) {
       ctx.save();
       ctx.translate(this.x, this.y);
-      ctx.fillStyle = 'red';
+      ctx.fillStyle = canMove ? 'green' : 'red';
 
       ctx.fillRect(0, 0, this.w, this.h);
 

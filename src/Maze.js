@@ -23,6 +23,7 @@ class Maze extends Entity {
 
     this.cells = this.createCells(cellWidth, cellHeight, cellsPerSide);
     this.player = this.createPlayer(1, 2);
+    this.playerCanMove = false;
 
     this.emitter = ee();
 
@@ -61,6 +62,10 @@ class Maze extends Entity {
     return new Player(this.cells.read(gridX, gridY), gridX, gridY, 12, 12);
   }
 
+  setPlayerMobility(boolean) {
+    this.playerCanMove = boolean;
+  }
+
   getPlayerGridCoords() {
     return this.player.getGridCoords();
   }
@@ -92,6 +97,8 @@ class Maze extends Entity {
   }
 
   handleInput(keys) {
+    if(!this.playerCanMove) return;
+
     // just worry about one key for now
     const dir = keys[0];
     if (!dir) return;
@@ -136,7 +143,7 @@ class Maze extends Entity {
 
     this.cells.each(cell => cell.draw(ctx, this.transforms.cellAlpha));
     this.drawBorder(ctx);
-    this.player.draw(ctx);
+    this.player.draw(ctx , this.playerCanMove);
 
     ctx.restore();
   }
