@@ -17802,7 +17802,19 @@ var Director = function () {
     key: 'newRound',
     value: function newRound() {
       this.clearPathAtPlayer();
-      this.maze.tweenCellAlpha(1000, 0);
+      this.showPaths();
+    }
+  }, {
+    key: 'showPaths',
+    value: function showPaths() {
+      var _this2 = this;
+
+      var fadeInDuration = 600;
+      var fadeOutDuration = 600;
+
+      this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
+        _this2.maze.tweenCellAlpha(fadeOutDuration, 0);
+      });
     }
   }, {
     key: 'clearPathAtPlayer',
@@ -18184,7 +18196,7 @@ var Maze = function (_Entity) {
     _this.emitter = (0, _eventEmitter2.default)();
 
     _this.transforms = {
-      cellAlpha: 1
+      cellAlpha: 0
     };
 
     _this.goal = {};
@@ -18194,7 +18206,10 @@ var Maze = function (_Entity) {
   _createClass(Maze, [{
     key: 'tweenCellAlpha',
     value: function tweenCellAlpha(duration, target) {
-      var tween = new _tween2.default.Tween(this.transforms).to({ cellAlpha: target }, duration).start();
+      // might as well start it now because it uses the `this.transforms` value
+      // it sees on construction, rather than whatever it might be when we call
+      // `.start()`. this is really REALLY vile and they should be ashamed
+      return new _tween2.default.Tween(this.transforms).to({ cellAlpha: target }, duration).start();
     }
   }, {
     key: 'createCells',

@@ -27,14 +27,17 @@ class Maze extends Entity {
     this.emitter = ee();
 
     this.transforms = {
-      cellAlpha: 1,
+      cellAlpha: 0,
     };
 
     this.goal = {};
   }
 
   tweenCellAlpha(duration, target) {
-    const tween = new TWEEN.Tween(this.transforms)
+    // might as well start it now because it uses the `this.transforms` value
+    // it sees on construction, rather than whatever it might be when we call
+    // `.start()`. this is really REALLY vile and they should be ashamed
+    return new TWEEN.Tween(this.transforms)
       .to({ cellAlpha: target }, duration)
       .start();
   }

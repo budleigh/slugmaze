@@ -12,7 +12,17 @@ class Director {
 
   newRound() {
     this.clearPathAtPlayer();
-    this.maze.tweenCellAlpha(1000, 0);
+    this.showPaths();
+  }
+
+  showPaths() {
+    const fadeInDuration = 600;
+    const fadeOutDuration = 600;
+
+    this.maze.tweenCellAlpha(fadeInDuration, 1)
+      .onComplete(() => {
+        this.maze.tweenCellAlpha(fadeOutDuration, 0);
+      });
   }
 
   clearPathAtPlayer() {
