@@ -51,6 +51,10 @@ class Path {
 
       tries++;
     }
+
+    // we tried so hard and got so far
+    // but in the end it doesn't even matter
+    return bestPath;
   }
 
   // iterates over the path given start coordinates, passing in the
