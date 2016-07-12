@@ -17900,7 +17900,7 @@ var Cell = function (_Entity) {
 
 exports.default = Cell;
 
-},{"./Entity.js":21,"./dirs.js":29,"lodash":16}],20:[function(require,module,exports){
+},{"./Entity.js":21,"./dirs.js":30,"lodash":16}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17942,15 +17942,16 @@ var borderColorFlashDuration = 1000;
 var Director = function (_Entity) {
   _inherits(Director, _Entity);
 
-  function Director(w, h, cellsPerSide, backgroundAPI) {
+  function Director(w, h, cellsPerSide, backgroundAPI, runGameOver) {
     _classCallCheck(this, Director);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Director).call(this, 0, 0, w, h));
 
     _this.backgroundAPI = backgroundAPI;
+    _this.runGameOver = runGameOver;
 
     _this.round = 0;
-    _this.lives = 1;
+    _this.lives = 3;
 
     _this.HUD = _this.createHUD(w, h);
     _this.initMaze(cellsPerSide);
@@ -17977,6 +17978,10 @@ var Director = function (_Entity) {
       this.lives = lives;
       this.HUD.setLives(lives);
     }
+
+    // create the instance's maze, hook up event listeners,
+    // and start a new round
+
   }, {
     key: 'initMaze',
     value: function initMaze(cellsPerSide) {
@@ -18080,13 +18085,14 @@ var Director = function (_Entity) {
       this.maze.flashBorderColorOnInterval(borderColorFlashDuration, 'red');
 
       // significantly speed up background
-      this.backgroundAPI.setLineSpeed(100);
+      this.backgroundAPI.setLineSpeed(125);
     }
   }, {
     key: 'onGameOver',
     value: function onGameOver() {
       this.backgroundAPI.setLineSpeed(0);
       this.maze.flashBorderColorOnInterval(3000 / 60, 'red');
+      this.runGameOver();
     }
   }, {
     key: 'killPlayer',
@@ -18191,7 +18197,7 @@ var Director = function (_Entity) {
 
 exports.default = Director;
 
-},{"./Entity.js":21,"./HUD.js":24,"./Maze.js":26,"./Path.js":27,"lodash":16}],21:[function(require,module,exports){
+},{"./Entity.js":21,"./HUD.js":25,"./Maze.js":27,"./Path.js":28,"lodash":16}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18260,6 +18266,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _tween = require('tween.js');
+
+var _tween2 = _interopRequireDefault(_tween);
+
 var _Director = require('./Director.js');
 
 var _Director2 = _interopRequireDefault(_Director);
@@ -18271,6 +18281,10 @@ var _Input2 = _interopRequireDefault(_Input);
 var _Background = require('./Background.js');
 
 var _Background2 = _interopRequireDefault(_Background);
+
+var _GameOver = require('./GameOver.js');
+
+var _GameOver2 = _interopRequireDefault(_GameOver);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18287,7 +18301,8 @@ var Game = function () {
 
     this.input = new _Input2.default();
     this.background = new _Background2.default(w, h);
-    this.director = new _Director2.default(w, h, cellsPerSide, this.background.getAPI());
+    this.foreground = new _GameOver2.default(w, h);
+    this.director = new _Director2.default(w, h, cellsPerSide, this.background.getAPI(), this.foreground.runGameOver.bind(this.foreground));
   }
 
   _createClass(Game, [{
@@ -18297,18 +18312,21 @@ var Game = function () {
 
       this.input.update();
       this.background.update(dt);
+      this.foreground.update(dt);
       this.director.update(dt, this.input.getPressedKeys());
     }
   }, {
     key: 'draw',
-    value: function draw(ctx, bgCtx) {
+    value: function draw(ctx, bgCtx, fgCtx) {
       this.background.draw(bgCtx);
 
-      // draw front layer
+      // draw game layer
       ctx.save();
       ctx.clearRect(0, 0, this.w, this.h);
       this.director.draw(ctx);
       ctx.restore();
+
+      this.foreground.draw(fgCtx);
     }
   }]);
 
@@ -18317,7 +18335,140 @@ var Game = function () {
 
 exports.default = Game;
 
-},{"./Background.js":18,"./Director.js":20,"./Input.js":25}],23:[function(require,module,exports){
+},{"./Background.js":18,"./Director.js":20,"./GameOver.js":23,"./Input.js":26,"tween.js":17}],23:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _tween = require('tween.js');
+
+var _tween2 = _interopRequireDefault(_tween);
+
+var _lodash = require('lodash');
+
+var _Entity2 = require('./Entity.js');
+
+var _Entity3 = _interopRequireDefault(_Entity2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var globalCtx = document.getElementById('fg').getContext('2d');
+
+var GameOver = function (_Entity) {
+  _inherits(GameOver, _Entity);
+
+  function GameOver(w, h) {
+    _classCallCheck(this, GameOver);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(GameOver).call(this, 0, 0, w, h));
+
+    _this.font = '30px sans-serif';
+    _this.transform = {
+      alpha: 0
+    };
+
+    _this.shouldDrawMessage = false;
+
+    _this.message = _this.createMessage(globalCtx);
+    return _this;
+  }
+
+  _createClass(GameOver, [{
+    key: 'runGameOver',
+    value: function runGameOver() {
+      var _this2 = this;
+
+      new _tween2.default.Tween(this.transform).to({ alpha: 1 }, 3000).easing(_tween2.default.Easing.Cubic.In).start();
+
+      setTimeout(function () {
+        _this2.shouldDrawMessage = true;
+      }, 4500);
+    }
+  }, {
+    key: 'update',
+    value: function update(dt) {
+      _tween2.default.update();
+    }
+  }, {
+    key: 'createMessage',
+    value: function createMessage(ctx) {
+      var _this3 = this;
+
+      ctx.save();
+      ctx.font = this.font;
+
+      var message = ['you have been', 'claimed by the', 'sleepy beyond'];
+
+      var measures = (0, _lodash.map)(message, ctx.measureText.bind(ctx));
+
+      ctx.restore();
+
+      var spacingY = 30;
+      var offsetY = this.h / 2 - spacingY * Math.floor(message.length / 2);
+
+      return (0, _lodash.map)(measures, function (measure, idx) {
+        return {
+          x: Math.floor((_this3.w - measure.width) / 2),
+          y: offsetY + idx * spacingY,
+          string: message[idx]
+        };
+      });
+    }
+  }, {
+    key: 'drawMessage',
+    value: function drawMessage(ctx) {
+      ctx.save();
+      ctx.font = this.font;
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'white';
+
+      (0, _lodash.each)(this.message, function (_ref) {
+        var string = _ref.string;
+        var x = _ref.x;
+        var y = _ref.y;
+
+        ctx.fillText(string, x, y);
+      });
+    }
+  }, {
+    key: 'draw',
+    value: function draw(ctx) {
+      ctx.clearRect(0, 0, this.w, this.h);
+
+      var alpha = this.transform.alpha;
+
+
+      if (!alpha) return;
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,' + alpha + ')';
+
+      ctx.fillRect(0, 0, this.w, this.h);
+
+      if (this.shouldDrawMessage) {
+        this.drawMessage(ctx);
+      }
+
+      ctx.restore();
+    }
+  }]);
+
+  return GameOver;
+}(_Entity3.default);
+
+exports.default = GameOver;
+
+},{"./Entity.js":21,"lodash":16,"tween.js":17}],24:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18387,7 +18538,7 @@ var Grid = function () {
 
 exports.default = Grid;
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18507,7 +18658,7 @@ var HUD = function (_Entity) {
 
 exports.default = HUD;
 
-},{"./Entity.js":21,"./Player.js":28,"lodash":16}],25:[function(require,module,exports){
+},{"./Entity.js":21,"./Player.js":29,"lodash":16}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18592,7 +18743,7 @@ var Input = function () {
 
 exports.default = Input;
 
-},{"lodash":16}],26:[function(require,module,exports){
+},{"lodash":16}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18941,7 +19092,7 @@ var Maze = function (_Entity) {
 exports.default = Maze;
 exports.events = events;
 
-},{"./Cell.js":19,"./Entity.js":21,"./Grid.js":23,"./Path.js":27,"./Player.js":28,"./dirs.js":29,"event-emitter":15,"lodash":16,"tween.js":17}],27:[function(require,module,exports){
+},{"./Cell.js":19,"./Entity.js":21,"./Grid.js":24,"./Path.js":28,"./Player.js":29,"./dirs.js":30,"event-emitter":15,"lodash":16,"tween.js":17}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19068,7 +19219,7 @@ var Path = function () {
 
 exports.default = Path;
 
-},{"./Grid.js":23,"./dirs.js":29,"lodash":16}],28:[function(require,module,exports){
+},{"./Grid.js":24,"./dirs.js":30,"lodash":16}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19136,7 +19287,7 @@ var Player = function (_Entity) {
 
 exports.default = Player;
 
-},{"./Entity.js":21}],29:[function(require,module,exports){
+},{"./Entity.js":21}],30:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -19197,7 +19348,7 @@ var Dir = {
 
 exports.default = Dir;
 
-},{"lodash":16}],30:[function(require,module,exports){
+},{"lodash":16}],31:[function(require,module,exports){
 'use strict';
 
 var _game = require('./game.js');
@@ -19208,10 +19359,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var canvas = document.getElementById('canvas');
 var bg = document.getElementById('bg');
-var width = canvas.width = bg.width = 500;
-var height = canvas.height = bg.height = 600;
+var fg = document.getElementById('fg');
+
+var width = canvas.width = bg.width = fg.width = 500;
+var height = canvas.height = bg.height = fg.height = 600;
+
 var ctx = canvas.getContext('2d');
 var bgCtx = bg.getContext('2d');
+var fgCtx = fg.getContext('2d');
 
 var game = new _game2.default(width, height);
 
@@ -19223,11 +19378,11 @@ function gameloop(timestamp) {
   nextTimestamp = timestamp;
 
   game.update((nextTimestamp - lastTimestamp) / 1000);
-  game.draw(ctx, bgCtx);
+  game.draw(ctx, bgCtx, fgCtx);
 
   requestAnimationFrame(gameloop);
 }
 
 requestAnimationFrame(gameloop);
 
-},{"./game.js":22}]},{},[30]);
+},{"./game.js":22}]},{},[31]);

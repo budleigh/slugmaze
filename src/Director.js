@@ -8,12 +8,13 @@ import HUD from './HUD.js';
 const borderColorFlashDuration = 1000;
 
 class Director extends Entity {
-  constructor(w, h, cellsPerSide, backgroundAPI) {
+  constructor(w, h, cellsPerSide, backgroundAPI, runGameOver) {
     super(0, 0, w, h);
     this.backgroundAPI = backgroundAPI;
+    this.runGameOver = runGameOver;
 
     this.round = 0;
-    this.lives = 1;
+    this.lives = 3;
 
     this.HUD = this.createHUD(w, h);
     this.initMaze(cellsPerSide);
@@ -35,6 +36,8 @@ class Director extends Entity {
     this.HUD.setLives(lives);
   }
 
+  // create the instance's maze, hook up event listeners,
+  // and start a new round
   initMaze(cellsPerSide) {
     this.cellsPerSide = cellsPerSide;
 
@@ -124,12 +127,13 @@ class Director extends Entity {
     this.maze.flashBorderColorOnInterval(borderColorFlashDuration, 'red');
 
     // significantly speed up background
-    this.backgroundAPI.setLineSpeed(100);
+    this.backgroundAPI.setLineSpeed(125);
   }
 
   onGameOver() {
     this.backgroundAPI.setLineSpeed(0);
     this.maze.flashBorderColorOnInterval(3000/60, 'red');
+    this.runGameOver();
   }
 
   killPlayer() {

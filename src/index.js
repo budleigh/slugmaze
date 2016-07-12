@@ -2,10 +2,14 @@ import Game from './game.js';
 
 const canvas = document.getElementById('canvas');
 const bg = document.getElementById('bg');
-const width = canvas.width = bg.width = 500;
-const height = canvas.height = bg.height = 600;
+const fg = document.getElementById('fg');
+
+const width = canvas.width = bg.width = fg.width = 500;
+const height = canvas.height = bg.height = fg.height = 600;
+
 const ctx = canvas.getContext('2d');
 const bgCtx = bg.getContext('2d');
+const fgCtx = fg.getContext('2d');
 
 const game = new Game(width, height);
 
@@ -17,7 +21,7 @@ function gameloop(timestamp) {
   nextTimestamp = timestamp;
 
   game.update((nextTimestamp - lastTimestamp) / 1000);
-  game.draw(ctx, bgCtx);
+  game.draw(ctx, bgCtx, fgCtx);
 
   requestAnimationFrame(gameloop);
 }
