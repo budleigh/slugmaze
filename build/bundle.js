@@ -17642,10 +17642,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _tween = require('tween.js');
-
-var _tween2 = _interopRequireDefault(_tween);
-
 var _Entity2 = require('./Entity');
 
 var _Entity3 = _interopRequireDefault(_Entity2);
@@ -17664,16 +17660,70 @@ var Background = function (_Entity) {
   function Background(w, h) {
     _classCallCheck(this, Background);
 
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(Background).call(this, 0, 0, w, h));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Background).call(this, 0, 0, w, h));
+
+    _this.lineSpacing = 60;
+    _this.lineStyle = 'rgba(50,50,50,.7)';
+
+    _this.transform = {
+      translationNE: 0
+    };
+
+    _this.lineSpeed = 25;
+    return _this;
   }
 
   _createClass(Background, [{
+    key: 'drawNELines',
+    value: function drawNELines(ctx) {
+      var translation = this.transform.translationNE;
+      var x = 0;
+
+      while (x < this.w * 2) {
+        ctx.beginPath();
+        ctx.moveTo(x - translation, 0);
+        ctx.lineTo(0, x - translation);
+        ctx.stroke();
+
+        x += this.lineSpacing;
+      }
+    }
+  }, {
+    key: 'drawSELines',
+    value: function drawSELines(ctx) {
+      var y = -2 * this.h;
+
+      while (y < this.h) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(this.h - y, this.h);
+        ctx.stroke();
+
+        y += this.lineSpacing;
+      }
+    }
+  }, {
+    key: 'update',
+    value: function update(dt) {
+      this.transform.translationNE += dt * this.lineSpeed;
+      this.transform.translationNE %= this.lineSpacing;
+    }
+  }, {
     key: 'draw',
     value: function draw(ctx) {
       ctx.save();
       ctx.fillStyle = 'black';
 
+      ctx.save();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = this.lineStyle;
+
       ctx.fillRect(0, 0, this.w, this.h);
+
+      // both of these are suuuper lazy but I don't really
+      // want to think about it
+      this.drawNELines(ctx);
+      this.drawSELines(ctx);
 
       ctx.restore();
     }
@@ -17684,7 +17734,7 @@ var Background = function (_Entity) {
 
 exports.default = Background;
 
-},{"./Entity":21,"tween.js":17}],19:[function(require,module,exports){
+},{"./Entity":21}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18034,7 +18084,10 @@ var Game = function () {
   _createClass(Game, [{
     key: 'update',
     value: function update(dt) {
+      if (!dt) return;
+
       this.input.update();
+      this.background.update(dt);
       this.director.update(dt, this.input.getPressedKeys());
     }
   }, {
@@ -18661,7 +18714,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var canvas = document.getElementById('canvas');
 var bg = document.getElementById('bg');
-var width = canvas.width = bg.width = 600;
+var width = canvas.width = bg.width = 500;
 var height = canvas.height = bg.height = 600;
 var ctx = canvas.getContext('2d');
 var bgCtx = bg.getContext('2d');

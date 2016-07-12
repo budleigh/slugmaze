@@ -13,7 +13,10 @@ class Game {
   }
 
   update(dt) {
+    if (!dt) return;
+
     this.input.update();
+    this.background.update(dt);
     this.director.update(dt, this.input.getPressedKeys());
   }
 
