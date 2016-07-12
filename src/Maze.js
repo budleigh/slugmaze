@@ -26,9 +26,6 @@ class Maze extends Entity {
     this.emitter = ee();
 
     this.goal = {};
-
-    // testing path drawing
-    this.openPath(2, 2, 'DDRRUULUULL');
   }
 
   createCells(cellWidth, cellHeight, cellsPerSide) {

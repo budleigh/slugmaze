@@ -17281,9 +17281,6 @@ var Maze = function (_Entity) {
     _this.emitter = (0, _eventEmitter2.default)();
 
     _this.goal = {};
-
-    // testing path drawing
-    _this.openPath(2, 2, 'DDRRUULUULL');
     return _this;
   }
 
