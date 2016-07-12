@@ -38,7 +38,7 @@ class Director extends Entity {
     this.maze.setPlayerMobility(false);
 
     this.showPaths(250, () => {
-      this.reflectMaze(0, () => {
+      this.reflectMaze(100, () => {
         this.maze.setPlayerMobility(true)
       });
     });
@@ -49,38 +49,38 @@ class Director extends Entity {
     console.log('you died haha');
   }
 
-  showPaths(delay = 0, callback) {
+  showPaths(delay = 0, onComplete) {
     const fadeInDuration = 400;
     const fadeOutDuration = 700;
 
     // yuck
     setTimeout(() => {
       this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(() => {
-        this.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(callback);
+        this.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
       });
     }, delay)
   }
 
-  rotateMaze(delay = 0, callback) {
+  rotateMaze(delay = 0, onComplete) {
     const turns = sample([-2, -1, 1, 2]);
     const duration = Math.abs(600 * turns);
 
     setTimeout(() => {
       this.maze.tweenRotation(duration, turns).onComplete(() => {
         this.maze.applyInputRotation(turns);
-        callback();
+        onComplete();
       });
     }, delay);
   }
 
-  reflectMaze(delay = 0, callback) {
+  reflectMaze(delay = 0, onComplete) {
     const duration = 600;
     const xAxis = Math.random() > .5;
 
     setTimeout(() => {
       this.maze.tweenReflection(duration, xAxis).onComplete(() => {
         this.maze.applyInputReflection(xAxis);
-        callback();
+        onComplete();
       });
     }, delay);
   }

@@ -17945,7 +17945,7 @@ var Director = function (_Entity) {
       this.maze.setPlayerMobility(false);
 
       this.showPaths(250, function () {
-        _this2.reflectMaze(0, function () {
+        _this2.reflectMaze(100, function () {
           _this2.maze.setPlayerMobility(true);
         });
       });
@@ -17962,7 +17962,7 @@ var Director = function (_Entity) {
       var _this3 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-      var callback = arguments[1];
+      var onComplete = arguments[1];
 
       var fadeInDuration = 400;
       var fadeOutDuration = 700;
@@ -17970,7 +17970,7 @@ var Director = function (_Entity) {
       // yuck
       setTimeout(function () {
         _this3.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
-          _this3.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(callback);
+          _this3.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
         });
       }, delay);
     }
@@ -17980,7 +17980,7 @@ var Director = function (_Entity) {
       var _this4 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-      var callback = arguments[1];
+      var onComplete = arguments[1];
 
       var turns = (0, _lodash.sample)([-2, -1, 1, 2]);
       var duration = Math.abs(600 * turns);
@@ -17988,7 +17988,7 @@ var Director = function (_Entity) {
       setTimeout(function () {
         _this4.maze.tweenRotation(duration, turns).onComplete(function () {
           _this4.maze.applyInputRotation(turns);
-          callback();
+          onComplete();
         });
       }, delay);
     }
@@ -17998,7 +17998,7 @@ var Director = function (_Entity) {
       var _this5 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
-      var callback = arguments[1];
+      var onComplete = arguments[1];
 
       var duration = 600;
       var xAxis = Math.random() > .5;
@@ -18006,7 +18006,7 @@ var Director = function (_Entity) {
       setTimeout(function () {
         _this5.maze.tweenReflection(duration, xAxis).onComplete(function () {
           _this5.maze.applyInputReflection(xAxis);
-          callback();
+          onComplete();
         });
       }, delay);
     }
