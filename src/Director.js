@@ -16,7 +16,7 @@ class Director extends Entity {
     this.HUD = this.createHUD(w, h);
 
     this.maze = this.createMaze(w, h, cellsPerSide);
-    this.maze.emitter.on(events.GOAL, () => this.newRound());
+    this.maze.emitter.on(events.GOAL, () => this.onGoal());
     this.maze.emitter.on(events.DIE, () => this.killPlayer());
 
     this.newRound();
@@ -39,6 +39,11 @@ class Director extends Entity {
     const hudY = h * .05;
 
     return new HUD(hudX, hudY, hudWidth, hudHeight, 3, 0);
+  }
+
+  onGoal() {
+    this.maze.flashGreenBorder(1500, () => console.log('we did it'));
+    this.newRound();
   }
 
   newRound() {

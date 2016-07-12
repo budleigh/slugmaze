@@ -1,5 +1,5 @@
 import ee from 'event-emitter';
-import { isEqual } from 'lodash';
+import { isEqual, mapValues } from 'lodash';
 import TWEEN from 'tween.js';
 
 import Entity from './Entity.js';
@@ -12,6 +12,13 @@ import Dir from './dirs.js';
 const events = {
   GOAL: 0,
   DIE: 1,
+};
+
+// use functions here to get clean copies because we're going
+// to end up mutating them
+const borderRGBAs = {
+  neutral: () => ({ r: 255, g: 255, b: 255, a: 0.6 }),
+  green: () => ({ r: 0, g: 255, b: 0, a: 0.8 }),
 };
 
 class Maze extends Entity {
@@ -32,6 +39,7 @@ class Maze extends Entity {
       rotation: 0,
       scaleX: 1,
       scaleY: 1,
+      borderRGBA: borderRGBAs.neutral(),
     };
 
     this.inputTransform = {
@@ -82,6 +90,18 @@ class Maze extends Entity {
     const prop = xAxis ? 'reflectX' : 'reflectY';
 
     this.inputTransform[prop] = !this.inputTransform[prop];
+  }
+
+  tweenBorderRGBA(duration, target) {
+    return new TWEEN.Tween(this.transforms.borderRGBA)
+      .to(target, duration)
+      .start();
+  }
+
+  flashGreenBorder(duration, onComplete) {
+    return this.tweenBorderRGBA(duration / 6, borderRGBAs.green()).onComplete(() => {
+      this.tweenBorderRGBA(duration / 6 * 5, borderRGBAs.neutral()).onComplete(onComplete);
+    });
   }
 
   createCells(cellWidth, cellHeight, cellsPerSide) {
@@ -183,9 +203,12 @@ class Maze extends Entity {
   }
 
   drawBorder(ctx) {
+    const { r, g, b } = mapValues(this.transforms.borderRGBA, Math.floor);
+    const a = this.transforms.borderRGBA.a;
+
     // draw border
     ctx.lineWidth = '4';
-    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+    ctx.strokeStyle = `rgba(${r},${g},${b},${a})`;
     ctx.strokeRect(0, 0, this.w, this.h);
   }
 

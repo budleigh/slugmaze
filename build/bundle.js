@@ -17914,7 +17914,7 @@ var Director = function (_Entity) {
 
     _this.maze = _this.createMaze(w, h, cellsPerSide);
     _this.maze.emitter.on(_Maze.events.GOAL, function () {
-      return _this.newRound();
+      return _this.onGoal();
     });
     _this.maze.emitter.on(_Maze.events.DIE, function () {
       return _this.killPlayer();
@@ -17944,6 +17944,14 @@ var Director = function (_Entity) {
       var hudY = h * .05;
 
       return new _HUD2.default(hudX, hudY, hudWidth, hudHeight, 3, 0);
+    }
+  }, {
+    key: 'onGoal',
+    value: function onGoal() {
+      this.maze.flashGreenBorder(1500, function () {
+        return console.log('we did it');
+      });
+      this.newRound();
     }
   }, {
     key: 'newRound',
@@ -18522,6 +18530,17 @@ var events = {
   DIE: 1
 };
 
+// use functions here to get clean copies because we're going
+// to end up mutating them
+var borderRGBAs = {
+  neutral: function neutral() {
+    return { r: 255, g: 255, b: 255, a: 0.6 };
+  },
+  green: function green() {
+    return { r: 0, g: 255, b: 0, a: 0.8 };
+  }
+};
+
 var Maze = function (_Entity) {
   _inherits(Maze, _Entity);
 
@@ -18544,7 +18563,8 @@ var Maze = function (_Entity) {
       cellAlpha: 0,
       rotation: 0,
       scaleX: 1,
-      scaleY: 1
+      scaleY: 1,
+      borderRGBA: borderRGBAs.neutral()
     };
 
     _this.inputTransform = {
@@ -18600,6 +18620,20 @@ var Maze = function (_Entity) {
       this.inputTransform[prop] = !this.inputTransform[prop];
     }
   }, {
+    key: 'tweenBorderRGBA',
+    value: function tweenBorderRGBA(duration, target) {
+      return new _tween2.default.Tween(this.transforms.borderRGBA).to(target, duration).start();
+    }
+  }, {
+    key: 'flashGreenBorder',
+    value: function flashGreenBorder(duration, onComplete) {
+      var _this2 = this;
+
+      return this.tweenBorderRGBA(duration / 6, borderRGBAs.green()).onComplete(function () {
+        _this2.tweenBorderRGBA(duration / 6 * 5, borderRGBAs.neutral()).onComplete(onComplete);
+      });
+    }
+  }, {
     key: 'createCells',
     value: function createCells(cellWidth, cellHeight, cellsPerSide) {
       var result = new _Grid2.default(cellsPerSide, cellsPerSide);
@@ -18640,10 +18674,10 @@ var Maze = function (_Entity) {
   }, {
     key: 'openPath',
     value: function openPath(startX, startY, path) {
-      var _this2 = this;
+      var _this3 = this;
 
       _Path2.default.each(startX, startY, path, function (x, y, idx) {
-        var cell = _this2.cells.read(x, y);
+        var cell = _this3.cells.read(x, y);
 
         // in (almost) every cell, we need to open the path we leave from
         // and the path we came from
@@ -18713,9 +18747,17 @@ var Maze = function (_Entity) {
   }, {
     key: 'drawBorder',
     value: function drawBorder(ctx) {
+      var _mapValues = (0, _lodash.mapValues)(this.transforms.borderRGBA, Math.floor);
+
+      var r = _mapValues.r;
+      var g = _mapValues.g;
+      var b = _mapValues.b;
+
+      var a = this.transforms.borderRGBA.a;
+
       // draw border
       ctx.lineWidth = '4';
-      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
       ctx.strokeRect(0, 0, this.w, this.h);
     }
   }, {
@@ -18729,13 +18771,13 @@ var Maze = function (_Entity) {
   }, {
     key: 'draw',
     value: function draw(ctx) {
-      var _this3 = this;
+      var _this4 = this;
 
       ctx.save();
       this.applyGraphicalTransforms(ctx);
 
       this.cells.each(function (cell) {
-        return cell.draw(ctx, _this3.transforms.cellAlpha);
+        return cell.draw(ctx, _this4.transforms.cellAlpha);
       });
       this.drawBorder(ctx);
       this.player.draw(ctx, this.playerCanMove);
