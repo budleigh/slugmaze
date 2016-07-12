@@ -67,6 +67,17 @@ class Path {
     // so we need to hit it manually at the end
     iterator(x, y, path.length);
   }
+
+  static delta(path) {
+    let result;
+
+    // this is reeeeeeeeeeally stupid but i'll take it
+    Path.each(0, 0, path, (x, y, idx) => {
+      if (idx === path.length) result = { x, y };
+    });
+
+    return result;
+  }
 }
 
 export default Path;
