@@ -82,8 +82,6 @@ class Director extends Entity {
   newRound() {
     this.backgroundAPI.bumpLineSpeed(-2);
 
-    console.log(this.round)
-
     this.maze.setPlayerMobility(false);
     this.clearPathAtPlayer();
 

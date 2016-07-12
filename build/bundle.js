@@ -18044,8 +18044,6 @@ var Director = function (_Entity) {
 
       this.backgroundAPI.bumpLineSpeed(-2);
 
-      console.log(this.round);
-
       this.maze.setPlayerMobility(false);
       this.clearPathAtPlayer();
 
