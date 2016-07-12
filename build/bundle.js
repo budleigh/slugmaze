@@ -17973,6 +17973,9 @@ var Director = function (_Entity) {
       }, {
         method: this.rotateMaze,
         args: [100]
+      }, {
+        method: this.reflectMaze,
+        args: [100]
       }], function () {
         return _this2.maze.setPlayerMobility(true);
       });

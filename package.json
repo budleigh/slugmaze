@@ -9,9 +9,10 @@
   "scripts": {
     "clean": "rm -rf build && mkdir build",
     "prebuild": "npm run clean",
+    "build:favicon": "cp src/favicon.ico build/favicon.ico",
     "build:html": "cp src/index.html build/index.html",
     "build:js": "browserify src/index.js -t [ babelify --presets [ es2015 ] ] > build/bundle.js",
-    "build": "npm run build:html && npm run build:js",
+    "build": "npm run build:html && npm run build:favicon && npm run build:js",
     "prewatch": "npm run clean",
     "watch": "npm run prebuild && watchify src/index.js -o build/bundle.js -v -t babelify",
     "start": "node server.js"

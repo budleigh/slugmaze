@@ -64,7 +64,11 @@ class Director extends Entity {
         {
           method: this.rotateMaze,
           args: [100],
-        }
+        },
+        {
+          method: this.reflectMaze,
+          args: [100],
+        },
       ],
       () => this.maze.setPlayerMobility(true)
     );
