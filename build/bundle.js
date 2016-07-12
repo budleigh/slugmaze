@@ -17951,7 +17951,7 @@ var Director = function (_Entity) {
     _this.runGameOver = runGameOver;
 
     _this.round = 0;
-    _this.lives = 3;
+    _this.lives = 2;
 
     _this.HUD = _this.createHUD(w, h);
     _this.initMaze(cellsPerSide);
@@ -17999,6 +17999,10 @@ var Director = function (_Entity) {
 
       this.newRound();
     }
+
+    // generate a maze from the desired number of cells and
+    // the dimensions of the screen
+
   }, {
     key: 'createMaze',
     value: function createMaze(w, h, cellsPerSide) {
@@ -18010,6 +18014,9 @@ var Director = function (_Entity) {
 
       return new _Maze2.default(mazeX, mazeY, cellSideLength, cellSideLength, cellsPerSide);
     }
+
+    // generate a HUD from the dimensions of the screen
+
   }, {
     key: 'createHUD',
     value: function createHUD(w, h) {
@@ -18037,13 +18044,40 @@ var Director = function (_Entity) {
 
       this.backgroundAPI.bumpLineSpeed(-2);
 
+      console.log(this.round);
+
       this.maze.setPlayerMobility(false);
       this.clearPathAtPlayer();
 
-      this.chainTransforms([{
+      var transforms = [{
         method: this.showPaths,
-        args: [250]
-      }], function () {
+        args: [100]
+      }];
+
+      // this would be a pretty good thing to refactor
+      if (this.round === 2) {
+        transforms.push({
+          method: this.rotateMaze,
+          args: [100]
+        });
+      } else if (this.round === 3) {
+        transforms.push({
+          method: this.reflectMaze,
+          args: [100]
+        });
+      } else if (this.round > 3) {
+        transforms.push({
+          method: this.rotateMaze,
+          args: [100]
+        });
+
+        transforms.push({
+          method: this.reflectMaze,
+          args: [100]
+        });
+      }
+
+      this.chainTransforms(transforms, function () {
         return _this3.maze.setPlayerMobility(true);
       });
     }

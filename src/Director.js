@@ -14,7 +14,7 @@ class Director extends Entity {
     this.runGameOver = runGameOver;
 
     this.round = 0;
-    this.lives = 3;
+    this.lives = 2;
 
     this.HUD = this.createHUD(w, h);
     this.initMaze(cellsPerSide);
@@ -48,6 +48,8 @@ class Director extends Entity {
     this.newRound();
   }
 
+  // generate a maze from the desired number of cells and
+  // the dimensions of the screen
   createMaze(w, h, cellsPerSide) {
     const mazeSideLength = Math.min(w, h) * .66;
     const mazeX = (w - mazeSideLength) / 2;
@@ -58,6 +60,7 @@ class Director extends Entity {
     return new Maze(mazeX, mazeY, cellSideLength, cellSideLength, cellsPerSide);
   }
 
+  // generate a HUD from the dimensions of the screen
   createHUD(w, h) {
     const hudWidth = w * .47;
     const hudHeight = h * .08;
@@ -79,23 +82,43 @@ class Director extends Entity {
   newRound() {
     this.backgroundAPI.bumpLineSpeed(-2);
 
+    console.log(this.round)
+
     this.maze.setPlayerMobility(false);
     this.clearPathAtPlayer();
 
-    this.chainTransforms([
-        {
-          method: this.showPaths,
-          args: [250],
-        },
-        // {
-        //   method: this.rotateMaze,
-        //   args: [100],
-        // },
-        // {
-        //   method: this.reflectMaze,
-        //   args: [100],
-        // },
-      ],
+    let transforms = [
+      {
+        method: this.showPaths,
+        args: [100],
+      },
+    ];
+
+    // this would be a pretty good thing to refactor
+    if (this.round === 2) {
+      transforms.push({
+        method: this.rotateMaze,
+        args: [100],
+      });
+    } else if (this.round === 3) {
+      transforms.push({
+        method: this.reflectMaze,
+        args: [100],
+      });
+    } else if (this.round > 3) {
+      transforms.push({
+        method: this.rotateMaze,
+        args: [100],
+      });
+
+      transforms.push({
+        method: this.reflectMaze,
+        args: [100],
+      });
+    }
+
+    this.chainTransforms(
+      transforms,
       () => this.maze.setPlayerMobility(true)
     );
   }
