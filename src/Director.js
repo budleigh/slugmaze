@@ -38,7 +38,7 @@ class Director extends Entity {
     const hudX = (w - hudWidth) / 2;
     const hudY = h * .05;
 
-    return new HUD(hudX, hudY, hudWidth, hudHeight, 3);
+    return new HUD(hudX, hudY, hudWidth, hudHeight, 3, 0);
   }
 
   newRound() {

@@ -6,16 +6,17 @@ import Player from './Player.js';
 class HUD extends Entity {
   constructor(x, y, w, h, lives, round) {
     super(x, y, w, h);
-    this.lives = lives;
-    this.round = round;
-    this.playerClones = this.createPlayerClones(lives);
-    console.log(this.playerClones)
+    this.setLives(lives);
+    this.setRound(round);
   }
 
   createPlayerClones(lives) {
-    const playerSideLength = 18;
+    // take up half the horizontal space
+    const playerSideLength = this.w / 4 / lives;
     const spacing = playerSideLength * 2;
-    const leftPad = playerSideLength;
+    const leftPad = playerSideLength / 2;
+
+    // and half the vertical space
     const topPad = (this.h - playerSideLength) / 2;
 
     return map(
@@ -29,10 +30,30 @@ class HUD extends Entity {
     );
   }
 
-  drawPlayerClones(ctx) {
+  setLives(lives) {
+    this.playerClones = this.createPlayerClones(lives);
+  }
+
+  setRound(round) {
+    this.round = round;
+  }
+
+  drawLives(ctx) {
     each(this.playerClones, (clone) => {
       Player.prototype.draw.call(clone, ctx, true);
     });
+  }
+
+  drawRound(ctx) {
+    ctx.save();
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'red';
+    ctx.font = '20px Helvetica';
+
+    ctx.fillText(this.round, this.w * 3 / 4, this.h / 2);
+
+    ctx.restore();
   }
 
   drawBorder(ctx) {
@@ -50,7 +71,8 @@ class HUD extends Entity {
     ctx.translate(this.x, this.y);
 
     this.drawBorder(ctx);
-    this.drawPlayerClones(ctx);
+    this.drawLives(ctx);
+    this.drawRound(ctx);
 
     ctx.restore();
   }

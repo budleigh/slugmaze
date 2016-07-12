@@ -17943,7 +17943,7 @@ var Director = function (_Entity) {
       var hudX = (w - hudWidth) / 2;
       var hudY = h * .05;
 
-      return new _HUD2.default(hudX, hudY, hudWidth, hudHeight, 3);
+      return new _HUD2.default(hudX, hudY, hudWidth, hudHeight, 3, 0);
     }
   }, {
     key: 'newRound',
@@ -18294,19 +18294,20 @@ var HUD = function (_Entity) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(HUD).call(this, x, y, w, h));
 
-    _this.lives = lives;
-    _this.round = round;
-    _this.playerClones = _this.createPlayerClones(lives);
-    console.log(_this.playerClones);
+    _this.setLives(lives);
+    _this.setRound(round);
     return _this;
   }
 
   _createClass(HUD, [{
     key: 'createPlayerClones',
     value: function createPlayerClones(lives) {
-      var playerSideLength = 18;
+      // take up half the horizontal space
+      var playerSideLength = this.w / 4 / lives;
       var spacing = playerSideLength * 2;
-      var leftPad = playerSideLength;
+      var leftPad = playerSideLength / 2;
+
+      // and half the vertical space
       var topPad = (this.h - playerSideLength) / 2;
 
       return (0, _lodash.map)((0, _lodash.range)(lives), function (life) {
@@ -18314,11 +18315,34 @@ var HUD = function (_Entity) {
       });
     }
   }, {
-    key: 'drawPlayerClones',
-    value: function drawPlayerClones(ctx) {
+    key: 'setLives',
+    value: function setLives(lives) {
+      this.playerClones = this.createPlayerClones(lives);
+    }
+  }, {
+    key: 'setRound',
+    value: function setRound(round) {
+      this.round = round;
+    }
+  }, {
+    key: 'drawLives',
+    value: function drawLives(ctx) {
       (0, _lodash.each)(this.playerClones, function (clone) {
         _Player2.default.prototype.draw.call(clone, ctx, true);
       });
+    }
+  }, {
+    key: 'drawRound',
+    value: function drawRound(ctx) {
+      ctx.save();
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'red';
+      ctx.font = '20px Helvetica';
+
+      ctx.fillText(this.round, this.w * 3 / 4, this.h / 2);
+
+      ctx.restore();
     }
   }, {
     key: 'drawBorder',
@@ -18338,7 +18362,8 @@ var HUD = function (_Entity) {
       ctx.translate(this.x, this.y);
 
       this.drawBorder(ctx);
-      this.drawPlayerClones(ctx);
+      this.drawLives(ctx);
+      this.drawRound(ctx);
 
       ctx.restore();
     }
