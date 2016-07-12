@@ -13,9 +13,9 @@ class Director extends Entity {
     this.round = 0;
     this.lives = 3;
 
-    this.maze = this.createMaze(w, h, cellsPerSide);
     this.HUD = this.createHUD(w, h);
 
+    this.maze = this.createMaze(w, h, cellsPerSide);
     this.maze.emitter.on(events.GOAL, () => this.newRound());
     this.maze.emitter.on(events.DIE, () => this.killPlayer());
 
@@ -43,23 +43,20 @@ class Director extends Entity {
 
   newRound() {
     this.round += 1;
-
     this.HUD.setRound(this.round);
 
-    this.clearPathAtPlayer();
-
     this.maze.setPlayerMobility(false);
+    this.clearPathAtPlayer();
 
     this.showPaths(250, () => {
       this.rotateMaze(100, () => {
-        this.maze.setPlayerMobility(true)
+        this.maze.setPlayerMobility(true);
       });
     });
   }
 
   killPlayer() {
     this.lives -= 1;
-
     this.HUD.removeLife();
   }
 
@@ -67,7 +64,6 @@ class Director extends Entity {
     const fadeInDuration = 400;
     const fadeOutDuration = 700;
 
-    // yuck
     setTimeout(() => {
       this.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(() => {
         this.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
@@ -88,8 +84,8 @@ class Director extends Entity {
   }
 
   reflectMaze(delay = 0, onComplete) {
-    const duration = 600;
     const xAxis = Math.random() > .5;
+    const duration = 600;
 
     setTimeout(() => {
       this.maze.tweenReflection(duration, xAxis).onComplete(() => {

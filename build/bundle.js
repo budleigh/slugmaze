@@ -17910,9 +17910,9 @@ var Director = function (_Entity) {
     _this.round = 0;
     _this.lives = 3;
 
-    _this.maze = _this.createMaze(w, h, cellsPerSide);
     _this.HUD = _this.createHUD(w, h);
 
+    _this.maze = _this.createMaze(w, h, cellsPerSide);
     _this.maze.emitter.on(_Maze.events.GOAL, function () {
       return _this.newRound();
     });
@@ -17951,12 +17951,10 @@ var Director = function (_Entity) {
       var _this2 = this;
 
       this.round += 1;
-
       this.HUD.setRound(this.round);
 
-      this.clearPathAtPlayer();
-
       this.maze.setPlayerMobility(false);
+      this.clearPathAtPlayer();
 
       this.showPaths(250, function () {
         _this2.rotateMaze(100, function () {
@@ -17968,7 +17966,6 @@ var Director = function (_Entity) {
     key: 'killPlayer',
     value: function killPlayer() {
       this.lives -= 1;
-
       this.HUD.removeLife();
     }
   }, {
@@ -17982,7 +17979,6 @@ var Director = function (_Entity) {
       var fadeInDuration = 400;
       var fadeOutDuration = 700;
 
-      // yuck
       setTimeout(function () {
         _this3.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
           _this3.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
@@ -18015,8 +18011,8 @@ var Director = function (_Entity) {
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
 
-      var duration = 600;
       var xAxis = Math.random() > .5;
+      var duration = 600;
 
       setTimeout(function () {
         _this5.maze.tweenReflection(duration, xAxis).onComplete(function () {
