@@ -143,7 +143,7 @@ class Maze extends Entity {
 
     this.cells.each(cell => cell.draw(ctx, this.transforms.cellAlpha));
     this.drawBorder(ctx);
-    this.player.draw(ctx , this.playerCanMove);
+    this.player.draw(ctx, this.playerCanMove);
 
     ctx.restore();
   }
