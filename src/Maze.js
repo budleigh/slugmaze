@@ -62,14 +62,24 @@ class Maze extends Entity {
 
   handleInput(keys) {
     // just worry about one key for now
-    const key = keys[0];
-    if (!key) return;
+    const dir = keys[0];
+    if (!dir) return;
 
-    const gridDelta = delta[key];
-    const gridX = this.player.gridX + gridDelta.x;
-    const gridY = this.player.gridY + gridDelta.y;
+    if (this.isValidInput(dir)) {
+      const gridDelta = delta[dir];
+      const gridX = this.player.gridX + gridDelta.x;
+      const gridY = this.player.gridY + gridDelta.y;
 
-    this.player.moveToCell(this.cells.read(gridX, gridY), gridX, gridY);
+      this.player.moveToCell(this.cells.read(gridX, gridY), gridX, gridY);
+    } else {
+      // TODO: kill player here
+    }
+  }
+
+  isValidInput(dir) {
+    return this.cells
+      .read(this.player.gridX, this.player.gridY)
+      .hasPath(dir);
   }
 
   update(dt, keys) {
