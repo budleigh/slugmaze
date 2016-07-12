@@ -17968,7 +17968,7 @@ var Director = function (_Entity) {
     value: function reflectMaze(callback) {
       var _this5 = this;
 
-      var duration = 800;
+      var duration = 600;
       var xAxis = Math.random() > .5;
 
       this.maze.tweenReflection(duration, xAxis).onComplete(function () {

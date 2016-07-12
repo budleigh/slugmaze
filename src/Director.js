@@ -57,7 +57,7 @@ class Director extends Entity {
   }
 
   reflectMaze(callback) {
-    const duration = 800;
+    const duration = 600;
     const xAxis = Math.random() > .5;
 
     this.maze.tweenReflection(duration, xAxis).onComplete(() => {
