@@ -17662,18 +17662,47 @@ var Background = function (_Entity) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Background).call(this, 0, 0, w, h));
 
-    _this.lineSpacing = 60;
+    _this.lineSpacing = 50;
     _this.lineStyle = 'rgba(50,50,50,.7)';
 
     _this.transform = {
-      translationNE: 0
+      translationNE: 0,
+      translationSE: 0
     };
 
-    _this.lineSpeed = 25;
+    // true if the NE lines are moving
+    // false if the SE lines are moving
+    _this.translatingNE = false;
+
+    _this.lineSpeed = -25;
     return _this;
   }
 
   _createClass(Background, [{
+    key: 'setLineSpeed',
+    value: function setLineSpeed(speed) {
+      this.lineSpeed = speed;
+    }
+  }, {
+    key: 'changeCurrent',
+    value: function changeCurrent() {
+      // always change the translated line direction
+      this.translatingNE = !this.translatingNE;
+
+      // sometimes change which way they're being translated
+      if (Math.random() < .5) {
+        this.lineSpeed = -this.lineSpeed;
+      }
+    }
+  }, {
+    key: 'getAPI',
+    value: function getAPI() {
+      return {
+        setLineSpeed: this.setLineSpeed.bind(this),
+        changeCurrent: this.changeCurrent.bind(this)
+      };
+    }
+  }, {
     key: 'drawNELines',
     value: function drawNELines(ctx) {
       var translation = this.transform.translationNE;
@@ -17691,12 +17720,13 @@ var Background = function (_Entity) {
   }, {
     key: 'drawSELines',
     value: function drawSELines(ctx) {
+      var translation = this.transform.translationSE;
       var y = -2 * this.h;
 
-      while (y < this.h) {
+      while (y < 2 * this.h) {
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(this.h - y, this.h);
+        ctx.moveTo(0 - translation - 100, y);
+        ctx.lineTo(this.h - y, this.h + translation + 100);
         ctx.stroke();
 
         y += this.lineSpacing;
@@ -17705,8 +17735,9 @@ var Background = function (_Entity) {
   }, {
     key: 'update',
     value: function update(dt) {
-      this.transform.translationNE += dt * this.lineSpeed;
-      this.transform.translationNE %= this.lineSpacing;
+      var prop = this.translatingNE ? 'translationNE' : 'translationSE';
+      this.transform[prop] += dt * this.lineSpeed;
+      this.transform[prop] %= this.lineSpacing;
     }
   }, {
     key: 'draw',
@@ -17905,13 +17936,15 @@ var borderColorFlashDuration = 1000;
 var Director = function (_Entity) {
   _inherits(Director, _Entity);
 
-  function Director(w, h, cellsPerSide) {
+  function Director(w, h, cellsPerSide, backgroundAPI) {
     _classCallCheck(this, Director);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Director).call(this, 0, 0, w, h));
 
+    _this.backgroundAPI = backgroundAPI;
+
     _this.round = 0;
-    _this.lives = 3;
+    _this.lives = 1;
 
     _this.HUD = _this.createHUD(w, h);
     _this.initMaze(cellsPerSide);
@@ -17974,7 +18007,7 @@ var Director = function (_Entity) {
       var hudX = (w - hudWidth) / 2;
       var hudY = h * .05;
 
-      return new _HUD2.default(hudX, hudY, hudWidth, hudHeight, 3, 0);
+      return new _HUD2.default(hudX, hudY, hudWidth, hudHeight, this.lives, this.round);
     }
   }, {
     key: 'onGoal',
@@ -17997,12 +18030,6 @@ var Director = function (_Entity) {
       this.chainTransforms([{
         method: this.showPaths,
         args: [250]
-      }, {
-        method: this.rotateMaze,
-        args: [100]
-      }, {
-        method: this.reflectMaze,
-        args: [100]
       }], function () {
         return _this3.maze.setPlayerMobility(true);
       });
@@ -18028,6 +18055,23 @@ var Director = function (_Entity) {
       this.maze.flashBorderColor(borderColorFlashDuration, 'red');
       this.killPlayer();
       this.newRound();
+
+      this.backgroundAPI.changeCurrent();
+
+      if (this.lives === 0) this.onNoLivesRemaining();
+    }
+  }, {
+    key: 'onNoLivesRemaining',
+    value: function onNoLivesRemaining() {
+      var _this5 = this;
+
+      // flash red border forever
+      setInterval(function () {
+        _this5.maze.flashBorderColor(borderColorFlashDuration, 'red');
+      }, borderColorFlashDuration * 1.2);
+
+      // significantly speed up background
+      this.backgroundAPI.setLineSpeed(100);
     }
   }, {
     key: 'killPlayer',
@@ -18038,7 +18082,7 @@ var Director = function (_Entity) {
   }, {
     key: 'showPaths',
     value: function showPaths() {
-      var _this5 = this;
+      var _this6 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18047,15 +18091,15 @@ var Director = function (_Entity) {
       var fadeOutDuration = 700;
 
       setTimeout(function () {
-        _this5.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
-          _this5.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
+        _this6.maze.tweenCellAlpha(fadeInDuration, 1).onComplete(function () {
+          _this6.maze.tweenCellAlpha(fadeOutDuration, 0).onComplete(onComplete);
         });
       }, delay);
     }
   }, {
     key: 'rotateMaze',
     value: function rotateMaze() {
-      var _this6 = this;
+      var _this7 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18064,8 +18108,8 @@ var Director = function (_Entity) {
       var duration = Math.abs(600 * turns);
 
       setTimeout(function () {
-        _this6.maze.tweenRotation(duration, turns).onComplete(function () {
-          _this6.maze.applyInputRotation(turns);
+        _this7.maze.tweenRotation(duration, turns).onComplete(function () {
+          _this7.maze.applyInputRotation(turns);
           onComplete();
         });
       }, delay);
@@ -18073,7 +18117,7 @@ var Director = function (_Entity) {
   }, {
     key: 'reflectMaze',
     value: function reflectMaze() {
-      var _this7 = this;
+      var _this8 = this;
 
       var delay = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
       var onComplete = arguments[1];
@@ -18082,8 +18126,8 @@ var Director = function (_Entity) {
       var duration = 600;
 
       setTimeout(function () {
-        _this7.maze.tweenReflection(duration, xAxis).onComplete(function () {
-          _this7.maze.applyInputReflection(xAxis);
+        _this8.maze.tweenReflection(duration, xAxis).onComplete(function () {
+          _this8.maze.applyInputReflection(xAxis);
           onComplete();
         });
       }, delay);
@@ -18224,9 +18268,11 @@ var Game = function () {
     this.w = w;
     this.h = h;
 
+    var cellsPerSide = 4;
+
     this.input = new _Input2.default();
-    this.director = new _Director2.default(w, h, 5);
     this.background = new _Background2.default(w, h);
+    this.director = new _Director2.default(w, h, cellsPerSide, this.background.getAPI());
   }
 
   _createClass(Game, [{

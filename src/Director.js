@@ -8,8 +8,9 @@ import HUD from './HUD.js';
 const borderColorFlashDuration = 1000;
 
 class Director extends Entity {
-  constructor(w, h, cellsPerSide) {
+  constructor(w, h, cellsPerSide, backgroundAPI) {
     super(0, 0, w, h);
+    this.backgroundAPI = backgroundAPI;
 
     this.round = 0;
     this.lives = 1;
@@ -81,14 +82,14 @@ class Director extends Entity {
           method: this.showPaths,
           args: [250],
         },
-        {
-          method: this.rotateMaze,
-          args: [100],
-        },
-        {
-          method: this.reflectMaze,
-          args: [100],
-        },
+        // {
+        //   method: this.rotateMaze,
+        //   args: [100],
+        // },
+        // {
+        //   method: this.reflectMaze,
+        //   args: [100],
+        // },
       ],
       () => this.maze.setPlayerMobility(true)
     );
@@ -106,11 +107,19 @@ class Director extends Entity {
     this.killPlayer();
     this.newRound();
 
-    if (this.lives === 0) {
-      setInterval(() => {
-        this.maze.flashBorderColor(borderColorFlashDuration, 'red');
-      }, borderColorFlashDuration * 1.2);
-    }
+    this.backgroundAPI.changeCurrent();
+
+    if (this.lives === 0) this.onNoLivesRemaining();
+  }
+
+  onNoLivesRemaining() {
+    // flash red border forever
+    setInterval(() => {
+      this.maze.flashBorderColor(borderColorFlashDuration, 'red');
+    }, borderColorFlashDuration * 1.2);
+
+    // significantly speed up background
+    this.backgroundAPI.setLineSpeed(100);
   }
 
   killPlayer() {

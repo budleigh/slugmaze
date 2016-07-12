@@ -3,14 +3,40 @@ import Entity from './Entity';
 class Background extends Entity {
   constructor(w, h) {
     super(0, 0, w, h);
-    this.lineSpacing = 60;
+    this.lineSpacing = 50;
     this.lineStyle = 'rgba(50,50,50,.7)';
 
     this.transform = {
       translationNE: 0,
+      translationSE: 0,
     };
 
-    this.lineSpeed = 25;
+    // true if the NE lines are moving
+    // false if the SE lines are moving
+    this.translatingNE = false;
+
+    this.lineSpeed = -25;
+  }
+
+  setLineSpeed(speed) {
+    this.lineSpeed = speed;
+  }
+
+  changeCurrent() {
+    // always change the translated line direction
+    this.translatingNE = !this.translatingNE;
+
+    // sometimes change which way they're being translated
+    if (Math.random() < .5) {
+      this.lineSpeed = -this.lineSpeed;
+    }
+  }
+
+  getAPI() {
+    return {
+      setLineSpeed: this.setLineSpeed.bind(this),
+      changeCurrent: this.changeCurrent.bind(this),
+    };
   }
 
   drawNELines(ctx) {
@@ -28,12 +54,13 @@ class Background extends Entity {
   }
 
   drawSELines(ctx) {
+    const translation = this.transform.translationSE;
     let y = -2 * this.h;
 
-    while (y < this.h) {
+    while (y < 2 * this.h) {
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.h - y, this.h);
+      ctx.moveTo(0 - translation - 100, y);
+      ctx.lineTo(this.h - y, this.h + translation + 100);
       ctx.stroke();
 
       y += this.lineSpacing;
@@ -41,8 +68,9 @@ class Background extends Entity {
   }
 
   update(dt) {
-    this.transform.translationNE += dt * this.lineSpeed;
-    this.transform.translationNE %= this.lineSpacing;
+    const prop = this.translatingNE ? 'translationNE' : 'translationSE';
+    this.transform[prop] += dt * this.lineSpeed;
+    this.transform[prop] %= this.lineSpacing;
   }
 
   draw(ctx) {

@@ -7,9 +7,11 @@ class Game {
     this.w = w;
     this.h = h;
 
+    const cellsPerSide = 4;
+
     this.input = new Input();
-    this.director = new Director(w, h, 5);
     this.background = new Background(w, h);
+    this.director = new Director(w, h, cellsPerSide, this.background.getAPI());
   }
 
   update(dt) {
