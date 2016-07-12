@@ -1,13 +1,27 @@
+import Entity from './Entity.js';
 import Path from './Path.js';
 import Maze, { events } from './Maze.js';
 
-class Director {
-  constructor() {
-    this.cellsPerSide = 6;
-    this.maze = new Maze(50, 50, 90, 90, this.cellsPerSide);
+class Director extends Entity {
+  constructor(w, h, cellsPerSide) {
+    super(0, 0, w, h);
+
+    this.cellsPerSide = cellsPerSide;
+
+    this.maze = this.createMaze(w, h, cellsPerSide);
     this.newRound();
 
     this.maze.emitter.on(events.GOAL, () => this.newRound());
+  }
+
+  createMaze(w, h, cellsPerSide) {
+    const mazeSideLength = Math.min(w, h) * 1/2;
+    const mazeX = (w - mazeSideLength) / 2;
+    const mazeY = (h - mazeSideLength) / 2;
+
+    const cellSideLength = mazeSideLength / cellsPerSide;
+
+    return new Maze(mazeX, mazeY, cellSideLength, cellSideLength, cellsPerSide);
   }
 
   newRound() {
