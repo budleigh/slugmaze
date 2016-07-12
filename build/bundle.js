@@ -17943,7 +17943,7 @@ var Director = function (_Entity) {
       var hudX = (w - hudWidth) / 2;
       var hudY = h * .05;
 
-      return new _HUD2.default(hudX, hudY, hudWidth, hudHeight);
+      return new _HUD2.default(hudX, hudY, hudWidth, hudHeight, 3);
     }
   }, {
     key: 'newRound',
@@ -18268,9 +18268,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _lodash = require('lodash');
+
 var _Entity2 = require('./Entity.js');
 
 var _Entity3 = _interopRequireDefault(_Entity2);
+
+var _Player = require('./Player.js');
+
+var _Player2 = _interopRequireDefault(_Player);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18283,21 +18289,56 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var HUD = function (_Entity) {
   _inherits(HUD, _Entity);
 
-  function HUD(x, y, w, h) {
+  function HUD(x, y, w, h, lives, round) {
     _classCallCheck(this, HUD);
 
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(HUD).call(this, x, y, w, h));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(HUD).call(this, x, y, w, h));
+
+    _this.lives = lives;
+    _this.round = round;
+    _this.playerClones = _this.createPlayerClones(lives);
+    console.log(_this.playerClones);
+    return _this;
   }
 
   _createClass(HUD, [{
-    key: 'draw',
-    value: function draw(ctx) {
+    key: 'createPlayerClones',
+    value: function createPlayerClones(lives) {
+      var playerSideLength = 18;
+      var spacing = playerSideLength * 2;
+      var leftPad = playerSideLength;
+      var topPad = (this.h - playerSideLength) / 2;
+
+      return (0, _lodash.map)((0, _lodash.range)(lives), function (life) {
+        return new _Entity3.default(life * spacing + leftPad, topPad, playerSideLength, playerSideLength);
+      });
+    }
+  }, {
+    key: 'drawPlayerClones',
+    value: function drawPlayerClones(ctx) {
+      (0, _lodash.each)(this.playerClones, function (clone) {
+        _Player2.default.prototype.draw.call(clone, ctx, true);
+      });
+    }
+  }, {
+    key: 'drawBorder',
+    value: function drawBorder(ctx) {
       ctx.save();
-      ctx.translate(this.x, this.y);
       ctx.strokeStyle = 'blue';
       ctx.lineWidth = 3;
 
       ctx.strokeRect(0, 0, this.w, this.h);
+
+      ctx.restore();
+    }
+  }, {
+    key: 'draw',
+    value: function draw(ctx) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+
+      this.drawBorder(ctx);
+      this.drawPlayerClones(ctx);
 
       ctx.restore();
     }
@@ -18308,7 +18349,7 @@ var HUD = function (_Entity) {
 
 exports.default = HUD;
 
-},{"./Entity.js":21}],25:[function(require,module,exports){
+},{"./Entity.js":21,"./Player.js":28,"lodash":16}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
