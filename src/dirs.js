@@ -23,6 +23,20 @@ const delta = {
   D: { x: 0, y: 1 },
 };
 
+const reflectX = {
+  L: dirs.R,
+  R: dirs.L,
+  U: dirs.U,
+  D: dirs.D,
+};
+
+const reflectY = {
+  L: dirs.L,
+  R: dirs.R,
+  U: dirs.D,
+  D: dirs.U,
+};
+
 function rotate(dir, turns) {
   const index = orderedDirs.indexOf(dir);
   const resultIndex = (((index + turns) % 4) + 4) % 4;
@@ -30,10 +44,13 @@ function rotate(dir, turns) {
   return orderedDirs[resultIndex];
 }
 
-export {
+const Dir = {
   dirs,
-  orderedDirs,
   oppDirs,
   delta,
   rotate,
+  reflectX,
+  reflectY,
 };
+
+export default Dir;

@@ -30,7 +30,7 @@ class Director extends Entity {
     this.clearPathAtPlayer();
     this.maze.setPlayerMobility(false);
     this.showPaths(() => {
-      this.rotateMaze(() => {
+      this.reflectMaze(() => {
         this.maze.setPlayerMobility(true)
       });
     });
@@ -47,13 +47,23 @@ class Director extends Entity {
   }
 
   rotateMaze(callback) {
-    const duration = 750;
     const turns = sample([-2, -1, 1, 2]);
+    const duration = Math.abs(600 * turns);
 
     this.maze.tweenRotation(duration, turns).onComplete(() => {
       this.maze.applyInputRotation(turns);
       callback();
-    })
+    });
+  }
+
+  reflectMaze(callback) {
+    const duration = 800;
+    const xAxis = Math.random() > .5;
+
+    this.maze.tweenReflection(duration, xAxis).onComplete(() => {
+      this.maze.applyInputReflection(xAxis);
+      callback();
+    });
   }
 
   clearPathAtPlayer() {

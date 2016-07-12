@@ -1,7 +1,7 @@
 import { each, filter } from 'lodash';
 
 import Entity from './Entity.js';
-import { dirs, delta } from './dirs.js';
+import Dir from './dirs.js';
 
 class Cell extends Entity {
   constructor(x, y, w, h) {
@@ -30,8 +30,8 @@ class Cell extends Entity {
   drawPath(ctx, dir) {
     ctx.beginPath();
 
-    const dx = delta[dir].x;
-    const dy = delta[dir].y;
+    const dx = Dir.delta[dir].x;
+    const dy = Dir.delta[dir].y;
 
     ctx.moveTo(
       this.cx + dx * this.pathOffsetFromCenter,

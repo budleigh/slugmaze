@@ -17751,6 +17751,8 @@ var _Entity3 = _interopRequireDefault(_Entity2);
 
 var _dirs = require('./dirs.js');
 
+var _dirs2 = _interopRequireDefault(_dirs);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -17798,8 +17800,8 @@ var Cell = function (_Entity) {
     value: function drawPath(ctx, dir) {
       ctx.beginPath();
 
-      var dx = _dirs.delta[dir].x;
-      var dy = _dirs.delta[dir].y;
+      var dx = _dirs2.default.delta[dir].x;
+      var dy = _dirs2.default.delta[dir].y;
 
       ctx.moveTo(this.cx + dx * this.pathOffsetFromCenter, this.cy + dy * this.pathOffsetFromCenter);
 
@@ -17930,7 +17932,7 @@ var Director = function (_Entity) {
       this.clearPathAtPlayer();
       this.maze.setPlayerMobility(false);
       this.showPaths(function () {
-        _this2.rotateMaze(function () {
+        _this2.reflectMaze(function () {
           _this2.maze.setPlayerMobility(true);
         });
       });
@@ -17953,11 +17955,24 @@ var Director = function (_Entity) {
     value: function rotateMaze(callback) {
       var _this4 = this;
 
-      var duration = 750;
       var turns = (0, _lodash.sample)([-2, -1, 1, 2]);
+      var duration = Math.abs(600 * turns);
 
       this.maze.tweenRotation(duration, turns).onComplete(function () {
         _this4.maze.applyInputRotation(turns);
+        callback();
+      });
+    }
+  }, {
+    key: 'reflectMaze',
+    value: function reflectMaze(callback) {
+      var _this5 = this;
+
+      var duration = 800;
+      var xAxis = Math.random() > .5;
+
+      this.maze.tweenReflection(duration, xAxis).onComplete(function () {
+        _this5.maze.applyInputReflection(xAxis);
         callback();
       });
     }
@@ -18325,7 +18340,11 @@ var _Path2 = _interopRequireDefault(_Path);
 
 var _dirs = require('./dirs.js');
 
+var _dirs2 = _interopRequireDefault(_dirs);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -18358,11 +18377,15 @@ var Maze = function (_Entity) {
 
     _this.transforms = {
       cellAlpha: 0,
-      rotation: 0
+      rotation: 0,
+      scaleX: 1,
+      scaleY: 1
     };
 
     _this.inputTransform = {
-      rotation: 0
+      rotation: 0,
+      reflectX: false,
+      reflectY: false
     };
 
     _this.goal = {};
@@ -18391,6 +18414,25 @@ var Maze = function (_Entity) {
       // this is somehow the nicest solution...
       this.inputTransform.rotation += ccwQuarterTurns + 16;
       this.inputTransform.rotation %= 4;
+    }
+
+    // second argument is true if reflecting x-axis, false if y-axis.
+    // to do both at once you can just call this twice
+
+  }, {
+    key: 'tweenReflection',
+    value: function tweenReflection(duration, xAxis) {
+      var transformProperty = xAxis ? 'scaleX' : 'scaleY';
+      var target = this.transforms[transformProperty] * -1;
+
+      return new _tween2.default.Tween(this.transforms).to(_defineProperty({}, transformProperty, target), duration).start();
+    }
+  }, {
+    key: 'applyInputReflection',
+    value: function applyInputReflection(xAxis) {
+      var prop = xAxis ? 'reflectX' : 'reflectY';
+
+      this.inputTransform[prop] = !this.inputTransform[prop];
     }
   }, {
     key: 'createCells',
@@ -18441,7 +18483,7 @@ var Maze = function (_Entity) {
         // in (almost) every cell, we need to open the path we leave from
         // and the path we came from
         var exitDir = path[idx];
-        var enterDir = _dirs.oppDirs[path[idx - 1]];
+        var enterDir = _dirs2.default.oppDirs[path[idx - 1]];
 
         if (exitDir) cell.openPath(exitDir);
         if (enterDir) cell.openPath(enterDir);
@@ -18455,9 +18497,16 @@ var Maze = function (_Entity) {
   }, {
     key: 'applyInputTransform',
     value: function applyInputTransform(dir) {
+      var _inputTransform = this.inputTransform;
+      var rotation = _inputTransform.rotation;
+      var reflectX = _inputTransform.reflectX;
+      var reflectY = _inputTransform.reflectY;
+
       var result = dir;
 
-      result = (0, _dirs.rotate)(result, this.inputTransform.rotation);
+      result = _dirs2.default.rotate(result, rotation);
+      if (reflectX) result = _dirs2.default.reflectX[result];
+      if (reflectY) result = _dirs2.default.reflectY[result];
 
       return result;
     }
@@ -18470,10 +18519,8 @@ var Maze = function (_Entity) {
       if (!keys.length) return;
       var dir = this.applyInputTransform(keys[0]);
 
-      console.log({ dir: dir });
-
       if (this.isValidInput(dir)) {
-        var gridDelta = _dirs.delta[dir];
+        var gridDelta = _dirs2.default.delta[dir];
         var gridX = this.player.gridX + gridDelta.x;
         var gridY = this.player.gridY + gridDelta.y;
 
@@ -18511,6 +18558,7 @@ var Maze = function (_Entity) {
     value: function applyGraphicalTransforms(ctx) {
       ctx.translate(this.cx, this.cy);
       ctx.rotate(this.transforms.rotation);
+      ctx.scale(this.transforms.scaleX, this.transforms.scaleY);
       ctx.translate(this.x - this.cx, this.y - this.cy);
     }
   }, {
@@ -18549,6 +18597,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _lodash = require('lodash');
 
 var _dirs = require('./dirs.js');
+
+var _dirs2 = _interopRequireDefault(_dirs);
 
 var _Grid = require('./Grid.js');
 
@@ -18592,16 +18642,16 @@ var Path = function () {
           grid.write(x, y, false);
 
           // enumerate the valid directions from our current location
-          validDirs = (0, _lodash.filter)(_dirs.dirs, function (dir) {
-            return grid.read(x + _dirs.delta[dir].x, y + _dirs.delta[dir].y);
+          validDirs = (0, _lodash.filter)(_dirs2.default.dirs, function (dir) {
+            return grid.read(x + _dirs2.default.delta[dir].x, y + _dirs2.default.delta[dir].y);
           });
 
           if (validDirs.length) {
             // choose a valid direction, add it to our path, and keep going
             nextDir = (0, _lodash.sample)(validDirs);
             nextPath += nextDir;
-            x += _dirs.delta[nextDir].x;
-            y += _dirs.delta[nextDir].y;
+            x += _dirs2.default.delta[nextDir].x;
+            y += _dirs2.default.delta[nextDir].y;
           } else {
             // we're stuck! check if our path is an improvement
             bestPath = bestPath.length >= nextPath.length ? bestPath : nextPath;
@@ -18628,8 +18678,8 @@ var Path = function () {
       // calls `iterator` on every cell visited but the last
       (0, _lodash.each)(path, function (dir, idx) {
         iterator(x, y, idx);
-        x += _dirs.delta[dir].x;
-        y += _dirs.delta[dir].y;
+        x += _dirs2.default.delta[dir].x;
+        y += _dirs2.default.delta[dir].y;
       });
 
       // so we need to hit it manually at the end
@@ -18732,7 +18782,6 @@ exports.default = Player;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.rotate = exports.delta = exports.oppDirs = exports.orderedDirs = exports.dirs = undefined;
 
 var _lodash = require('lodash');
 
@@ -18756,6 +18805,20 @@ var delta = {
   D: { x: 0, y: 1 }
 };
 
+var reflectX = {
+  L: dirs.R,
+  R: dirs.L,
+  U: dirs.U,
+  D: dirs.D
+};
+
+var reflectY = {
+  L: dirs.L,
+  R: dirs.R,
+  U: dirs.D,
+  D: dirs.U
+};
+
 function rotate(dir, turns) {
   var index = orderedDirs.indexOf(dir);
   var resultIndex = ((index + turns) % 4 + 4) % 4;
@@ -18763,11 +18826,16 @@ function rotate(dir, turns) {
   return orderedDirs[resultIndex];
 }
 
-exports.dirs = dirs;
-exports.orderedDirs = orderedDirs;
-exports.oppDirs = oppDirs;
-exports.delta = delta;
-exports.rotate = rotate;
+var Dir = {
+  dirs: dirs,
+  oppDirs: oppDirs,
+  delta: delta,
+  rotate: rotate,
+  reflectX: reflectX,
+  reflectY: reflectY
+};
+
+exports.default = Dir;
 
 },{"lodash":16}],29:[function(require,module,exports){
 'use strict';

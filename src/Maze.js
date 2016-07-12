@@ -7,7 +7,7 @@ import Cell from './Cell.js';
 import Player from './Player.js';
 import Grid from './Grid.js';
 import Path from './Path.js';
-import { delta, dirs, oppDirs, rotate } from './dirs.js';
+import Dir from './dirs.js';
 
 const events = {
   GOAL: 0,
@@ -30,10 +30,14 @@ class Maze extends Entity {
     this.transforms = {
       cellAlpha: 0,
       rotation: 0,
+      scaleX: 1,
+      scaleY: 1,
     };
 
     this.inputTransform = {
       rotation: 0,
+      reflectX: false,
+      reflectY: false,
     };
 
     this.goal = {};
@@ -61,6 +65,23 @@ class Maze extends Entity {
     // this is somehow the nicest solution...
     this.inputTransform.rotation += ccwQuarterTurns + 16;
     this.inputTransform.rotation %= 4;
+  }
+
+  // second argument is true if reflecting x-axis, false if y-axis.
+  // to do both at once you can just call this twice
+  tweenReflection(duration, xAxis) {
+    const transformProperty = xAxis ? 'scaleX' : 'scaleY';
+    const target = this.transforms[transformProperty] * -1;
+
+    return new TWEEN.Tween(this.transforms)
+      .to({ [transformProperty]: target }, duration)
+      .start();
+  }
+
+  applyInputReflection(xAxis) {
+    const prop = xAxis ? 'reflectX' : 'reflectY';
+
+    this.inputTransform[prop] = !this.inputTransform[prop];
   }
 
   createCells(cellWidth, cellHeight, cellsPerSide) {
@@ -105,7 +126,7 @@ class Maze extends Entity {
       // in (almost) every cell, we need to open the path we leave from
       // and the path we came from
       const exitDir = path[idx];
-      const enterDir = oppDirs[path[idx - 1]];
+      const enterDir = Dir.oppDirs[path[idx - 1]];
 
       if (exitDir) cell.openPath(exitDir);
       if (enterDir) cell.openPath(enterDir);
@@ -117,9 +138,12 @@ class Maze extends Entity {
   }
 
   applyInputTransform(dir) {
+    const { rotation, reflectX, reflectY } = this.inputTransform;
     let result = dir;
 
-    result = rotate(result, this.inputTransform.rotation);
+    result = Dir.rotate(result, rotation);
+    if (reflectX) result = Dir.reflectX[result];
+    if (reflectY) result = Dir.reflectY[result];
 
     return result;
   }
@@ -131,10 +155,8 @@ class Maze extends Entity {
     if (!keys.length) return;
     const dir = this.applyInputTransform(keys[0]);
 
-    console.log({ dir })
-
     if (this.isValidInput(dir)) {
-      const gridDelta = delta[dir];
+      const gridDelta = Dir.delta[dir];
       const gridX = this.player.gridX + gridDelta.x;
       const gridY = this.player.gridY + gridDelta.y;
 
@@ -170,6 +192,7 @@ class Maze extends Entity {
   applyGraphicalTransforms(ctx) {
     ctx.translate(this.cx, this.cy);
     ctx.rotate(this.transforms.rotation);
+    ctx.scale(this.transforms.scaleX, this.transforms.scaleY);
     ctx.translate(this.x - this.cx, this.y - this.cy);
   }
 

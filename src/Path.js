@@ -1,6 +1,6 @@
 import { filter, sample, each } from 'lodash';
 
-import { dirs, delta } from './dirs.js';
+import Dir from './dirs.js';
 import Grid from './Grid.js';
 
 class Path {
@@ -29,16 +29,16 @@ class Path {
 
         // enumerate the valid directions from our current location
         validDirs = filter(
-          dirs,
-          dir => grid.read(x + delta[dir].x, y + delta[dir].y)
+          Dir.dirs,
+          dir => grid.read(x + Dir.delta[dir].x, y + Dir.delta[dir].y)
         );
 
         if (validDirs.length) {
           // choose a valid direction, add it to our path, and keep going
           nextDir = sample(validDirs);
           nextPath += nextDir;
-          x += delta[nextDir].x;
-          y += delta[nextDir].y;
+          x += Dir.delta[nextDir].x;
+          y += Dir.delta[nextDir].y;
         } else {
           // we're stuck! check if our path is an improvement
           bestPath = bestPath.length >= nextPath.length ? bestPath : nextPath;
@@ -62,8 +62,8 @@ class Path {
     // calls `iterator` on every cell visited but the last
     each(path, (dir, idx) => {
       iterator(x, y, idx);
-      x += delta[dir].x;
-      y += delta[dir].y;
+      x += Dir.delta[dir].x;
+      y += Dir.delta[dir].y;
     });
 
     // so we need to hit it manually at the end
