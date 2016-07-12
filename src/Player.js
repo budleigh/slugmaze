@@ -14,6 +14,13 @@ class Player extends Entity {
     this.gridY = gridY;
   }
 
+  getGridCoords() {
+    return {
+      x: this.gridX,
+      y: this.gridY,
+    };
+  }
+
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);

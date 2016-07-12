@@ -7,6 +7,13 @@ const dirs = mapKeys([
   'U',
 ], v => v);
 
+const oppDirs = {
+  L: 'R',
+  R: 'L',
+  U: 'D',
+  D: 'U',
+};
+
 const delta = {
   L: { x: -1, y: 0 },
   U: { x: 0, y: -1 },
@@ -16,5 +23,6 @@ const delta = {
 
 export {
   dirs,
+  oppDirs,
   delta,
 };

@@ -16454,7 +16454,7 @@ var Cell = function (_Entity) {
     }
   }, {
     key: 'closeAllPaths',
-    value: function closeAllPaths(dir) {
+    value: function closeAllPaths() {
       this.paths = {};
     }
   }, {
@@ -16841,15 +16841,12 @@ var Maze = function (_Entity) {
     _this.cellWidth = cellWidth;
     _this.cellHeight = cellHeight;
     _this.cellsPerSide = cellsPerSide;
-    _this.cells = _this.createCells(cellWidth, cellHeight, cellsPerSide);
 
+    _this.cells = _this.createCells(cellWidth, cellHeight, cellsPerSide);
     _this.player = _this.createPlayer(1, 2);
 
-    var cell = _this.cells.read(2, 2);
-    cell.openPath('L');
-    cell.openPath('D');
-    cell.openPath('U');
-    cell.openPath('R');
+    // testing path drawing
+    _this.openPath(2, 2, 'DDRRUULUULL');
     return _this;
   }
 
@@ -16868,6 +16865,30 @@ var Maze = function (_Entity) {
     key: 'createPlayer',
     value: function createPlayer(gridX, gridY) {
       return new _Player2.default(this.cells.read(gridX, gridY), gridX, gridY, 12, 12);
+    }
+  }, {
+    key: 'closeAllPaths',
+    value: function closeAllPaths() {
+      this.cells.each(function (cell) {
+        return cell.closeAllPaths();
+      });
+    }
+  }, {
+    key: 'openPath',
+    value: function openPath(startX, startY, path) {
+      var _this2 = this;
+
+      _Path2.default.each(startX, startY, path, function (x, y, idx) {
+        var cell = _this2.cells.read(x, y);
+
+        // in (almost) every cell, we need to open the path we leave from
+        // and the path we came from
+        var exitDir = path[idx];
+        var enterDir = _dirs.oppDirs[path[idx - 1]];
+
+        if (exitDir) cell.openPath(exitDir);
+        if (enterDir) cell.openPath(enterDir);
+      });
     }
   }, {
     key: 'handleInput',
@@ -16975,8 +16996,6 @@ var Path = function () {
             return grid.read(x + _dirs.delta[dir].x, y + _dirs.delta[dir].y);
           });
 
-          console.log({ x: x, y: y, validDirs: validDirs });
-
           if (validDirs.length) {
             // choose a valid direction, add it to our path, and keep going
             nextDir = (0, _lodash.sample)(validDirs);
@@ -16996,12 +17015,26 @@ var Path = function () {
         tries++;
       }
     }
+  }, {
+    key: 'each',
+    value: function each(startX, startY, path, iterator) {
+      var x = startX;
+      var y = startY;
+
+      // calls `iterator` on every cell visited but the last
+      (0, _lodash.each)(path, function (dir, idx) {
+        iterator(x, y, idx);
+        x += _dirs.delta[dir].x;
+        y += _dirs.delta[dir].y;
+      });
+
+      // so we need to hit it manually at the end
+      iterator(x, y, path.length);
+    }
   }]);
 
   return Path;
 }();
-
-console.log(Path.random(0, 0, 6, 6, 12));
 
 exports.default = Path;
 
@@ -17048,6 +17081,14 @@ var Player = function (_Entity) {
       this.gridY = gridY;
     }
   }, {
+    key: 'getGridCoords',
+    value: function getGridCoords() {
+      return {
+        x: this.gridX,
+        y: this.gridY
+      };
+    }
+  }, {
     key: 'draw',
     value: function draw(ctx) {
       ctx.save();
@@ -17071,13 +17112,20 @@ exports.default = Player;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.delta = exports.dirs = undefined;
+exports.delta = exports.oppDirs = exports.dirs = undefined;
 
 var _lodash = require('lodash');
 
 var dirs = (0, _lodash.mapKeys)(['L', 'D', 'R', 'U'], function (v) {
   return v;
 });
+
+var oppDirs = {
+  L: 'R',
+  R: 'L',
+  U: 'D',
+  D: 'U'
+};
 
 var delta = {
   L: { x: -1, y: 0 },
@@ -17087,6 +17135,7 @@ var delta = {
 };
 
 exports.dirs = dirs;
+exports.oppDirs = oppDirs;
 exports.delta = delta;
 
 },{"lodash":1}],11:[function(require,module,exports){
